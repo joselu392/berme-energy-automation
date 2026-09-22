@@ -1,0 +1,18 @@
+{
+  "brand": "Berme Energy",
+  "instagram": "@berme.energy",
+  "palette": {
+    "background": "#F7F4ED",
+    "ink": "#111111",
+    "accent_olive": "#69705B",
+    "warm_gray": "#D9D4CA",
+    "card": "#FFFFFF"
+  },
+  "story": {
+    "width": 1080,
+    "height": 1920,
+    "safe_top_px": 220,
+    "safe_bottom_px": 300,
+    "cta": "Si necesitas ayuda con tu factura, escríbenos. Te ayudamos gratuitamente."
+  }
+}
