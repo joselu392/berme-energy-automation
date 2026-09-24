@@ -106,8 +106,15 @@ def fetch_eu_history():
             if diesel_idx is None and re.search(r"gas\s*oil|gasoil|automotive", h):
                 diesel_idx = j
 
+        # The Commission workbook keeps Euro-super 95 and Automotive gas oil
+        # as the first two product columns after each CTR column. Use that
+        # stable layout as a fallback because the exact header wording varies.
+        if gas_idx is None and start + 1 <= end:
+            gas_idx = start + 1
+        if diesel_idx is None and start + 2 <= end:
+            diesel_idx = start + 2
         if gas_idx is None or diesel_idx is None:
-            raise RuntimeError("No se encontraron las columnas Gasolina 95 y Diésel A para España")
+            raise RuntimeError("No se pudieron localizar Gasolina 95 y Diésel A para España")
 
         data = []
         for row in rows[3:]:
