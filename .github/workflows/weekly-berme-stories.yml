@@ -39,7 +39,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install dependencies
-        run: pip install pillow requests
+        run: pip install pillow requests xlrd
       - name: Generate electricity
         run: python stories/electricity_weekly.py
       - name: Generate gas
