@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import csv, io, json, os, xml.etree.ElementTree as ET
+import csv, io, json, os, re, xml.etree.ElementTree as ET
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -10,7 +10,7 @@ ROOT=Path(__file__).resolve().parents[1]
 DOCS=ROOT/"docs"; DOCS.mkdir(exist_ok=True)
 OUT_IMG=DOCS/"story-weekly-brent.jpg"
 OUT_JSON=DOCS/"story-weekly-brent.json"
-FRED_BASE="https://fred.stlouisfed.org/graph/fredgraph.csv"
+FRED_BASE="https://fred.stlouisfed.org/data/DCOILBRENTEU.txt"
 FX_BASE="https://api.frankfurter.app"
 HIST_MAX_EUR_BBL=122.22
 HIST_MAX_DATE="2022-03-08"
@@ -33,12 +33,18 @@ def get_with_retry(url, params=None, timeout=45, attempts=3):
     raise last
 
 def weekly_brent(start,end):
-    r=get_with_retry(FRED_BASE,params={"id":"DCOILBRENTEU","cosd":start.isoformat(),"coed":end.isoformat()})
+    # FRED's table-data endpoint is lighter and more reliable than the chart CSV endpoint.
+    r=get_with_retry(FRED_BASE,timeout=30)
+    text=r.text
     rows={}
-    for x in csv.DictReader(io.StringIO(r.text)):
-        raw=x.get("DCOILBRENTEU","")
-        if raw and raw not in {".","NA"}:
-            rows[date.fromisoformat(x["DATE"])]=float(raw)
+    d=start
+    while d<=end:
+        key=d.isoformat()
+        # Works with both raw-text and HTML/table representations.
+        m=re.search(rf"{re.escape(key)}(?:\\s*\\||[^0-9.\\-]{{1,120}})([0-9]+(?:\\.[0-9]+)?)",text)
+        if m:
+            rows[d]=float(m.group(1))
+        d+=timedelta(days=1)
     return rows
 
 def weekly_fx(start,end):
