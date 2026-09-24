@@ -7,17 +7,17 @@
     "excludes": "potencia, cuotas, mantenimiento, servicios extra e impuestos",
     "aggregation": "media aritmética simple de una tarifa seleccionada por comercializadora"
   },
-  "average_eur_kwh": 0.127448,
+  "average_eur_kwh": 0.1247587,
   "min": {
     "name": "TotalEnergies",
     "price_eur_kwh": 0.0999
   },
   "max": {
     "name": "Holaluz",
-    "price_eur_kwh": 0.165
+    "price_eur_kwh": 0.178
   },
   "change_vs_previous_pct": null,
-  "live_sources": 10,
+  "live_sources": 9,
   "providers": [
     {
       "name": "Endesa",
@@ -29,12 +29,12 @@
     },
     {
       "name": "Iberdrola",
-      "tariff": "Plan Online",
-      "price_eur_kwh": 0.1499,
+      "tariff": "Plan Estable",
+      "price_eur_kwh": 0.1273,
       "status": "live_fallback_source",
-      "source_url": "https://luzometro.com/companias-luz/iberdrola",
+      "source_url": "https://www.servalys.es/comercializadoras/iberdrola",
       "errors": [
-        "https://www.iberdrola.es/luz/tarifas: HTTPError: 403 Client Error: Forbidden for url: https://www.iberdrola.es/luz/tarifas"
+        "https://www.iberdrola.es/luz/tarifas/plan-estable: HTTPError: 403 Client Error: Forbidden for url: https://www.iberdrola.es/luz/tarifas/plan-estable"
       ]
     },
     {
@@ -42,15 +42,15 @@
       "tariff": "Tarifa Por Uso Luz",
       "price_eur_kwh": 0.112,
       "status": "live",
-      "source_url": "https://www.naturgy.es/precios_tarifauso_luz",
+      "source_url": "https://www.naturgy.es/hogar/luz/tarifa_por_uso_luz",
       "errors": []
     },
     {
       "name": "Repsol",
       "tariff": "Tarifa Sin Horarios",
-      "price_eur_kwh": 0.1199,
+      "price_eur_kwh": 0.12,
       "status": "live_fallback_source",
-      "source_url": "https://selectra.es/energia/comparador/tarifa-luz",
+      "source_url": "https://www.servalys.es/comercializadoras/repsol",
       "errors": [
         "https://www.repsol.es/particulares/hogar/luz-y-gas/tarifas/plan-mixto-rl2/: ValueError: No se encontró un precio 24h válido"
       ]
@@ -59,9 +59,11 @@
       "name": "TotalEnergies",
       "tariff": "A tu Aire Siempre Luz",
       "price_eur_kwh": 0.0999,
-      "status": "live",
-      "source_url": "https://www.totalenergies.es/es/hogares",
-      "errors": []
+      "status": "bootstrap_seed",
+      "source_url": "https://www.totalenergies.es/es/hogares/tarifas-luz/a-tu-aire-siempre",
+      "errors": [
+        "https://www.totalenergies.es/es/hogares/tarifas-luz/a-tu-aire-siempre: ValueError: No se encontró un precio 24h válido"
+      ]
     },
     {
       "name": "Octopus",
@@ -74,9 +76,9 @@
     {
       "name": "Pepeenergy",
       "tariff": "Tarifa Estable",
-      "price_eur_kwh": 0.1298,
+      "price_eur_kwh": 0.1199,
       "status": "live",
-      "source_url": "https://www.pepeenergy.com/",
+      "source_url": "https://www.pepeenergy.com/tarifas-luz/tarifa-estable-luz",
       "errors": []
     },
     {
@@ -92,19 +94,17 @@
     {
       "name": "Holaluz",
       "tariff": "Tarifa Clásica online",
-      "price_eur_kwh": 0.165,
-      "status": "live_fallback_source",
-      "source_url": "https://www.tarifadeluzhoy.com/comparador/holaluz-octopus-energy",
-      "errors": [
-        "https://www.holaluz.com/luz/tarifas-luz: ValueError: No se encontró un precio 24h válido"
-      ]
+      "price_eur_kwh": 0.178,
+      "status": "live",
+      "source_url": "https://autoconsumo.holaluz.com/tarifas-luz",
+      "errors": []
     },
     {
       "name": "Plenitude",
       "tariff": "Fácil Plus Luz",
-      "price_eur_kwh": 0.11999,
+      "price_eur_kwh": 0.112497,
       "status": "live",
-      "source_url": "https://eniplenitude.es/",
+      "source_url": "https://eniplenitude.es/hogar/tarifas-luz/facil/precios/",
       "errors": []
     }
   ]
