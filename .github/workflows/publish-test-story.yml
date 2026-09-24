@@ -1,0 +1,152 @@
+name: Publish Test Story
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/publish-test-story.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: berme-test-story
+  cancel-in-progress: false
+
+jobs:
+  publish-test-story:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Pillow
+        run: pip install pillow
+
+      - name: Render today's Story
+        run: python stories/render_test_story.py
+
+      - name: Publish image to repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/story-test-luz.jpg
+          if git diff --cached --quiet; then
+            echo "Story image already up to date."
+          else
+            git commit -m "Render test electricity Story"
+            git push
+          fi
+
+      - name: Wait for public image
+        run: |
+          URL="https://raw.githubusercontent.com/joselu392/berme-energy-automation/main/docs/story-test-luz.jpg?run=${GITHUB_RUN_ID}"
+          for i in {1..20}; do
+            CODE=$(curl -L -s -o /dev/null -w "%{http_code}" "$URL")
+            if [ "$CODE" = "200" ]; then
+              echo "Image is public."
+              exit 0
+            fi
+            echo "Waiting for public image ($CODE)..."
+            sleep 3
+          done
+          echo "Public image did not become available."
+          exit 1
+
+      - name: Create Instagram Story container
+        id: container
+        env:
+          META_IG_ACCESS_TOKEN: ${{ secrets.META_IG_ACCESS_TOKEN }}
+          META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
+        run: |
+          TOKEN="$(printf '%s' "$META_IG_ACCESS_TOKEN" | tr -d '\r\n')"
+          IG_ID="$(printf '%s' "$META_IG_USER_ID" | tr -d '\r\n ')"
+          IMAGE_URL="https://raw.githubusercontent.com/joselu392/berme-energy-automation/main/docs/story-test-luz.jpg?run=${GITHUB_RUN_ID}"
+
+          RESPONSE=$(curl -sS -X POST "https://graph.instagram.com/$IG_ID/media" \
+            --data-urlencode "media_type=STORIES" \
+            --data-urlencode "image_url=$IMAGE_URL" \
+            --data-urlencode "access_token=$TOKEN")
+
+          echo "$RESPONSE" > /tmp/container.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open("/tmp/container.json"))
+          if "error" in d:
+              e=d["error"]
+              print("Instagram API error:", e.get("message"))
+              print("Error code:", e.get("code"))
+              raise SystemExit(1)
+          if not d.get("id"):
+              print("No container id returned:", d)
+              raise SystemExit(1)
+          print("Container created successfully.")
+          PY
+
+          CID=$(python3 -c 'import json; print(json.load(open("/tmp/container.json"))["id"])')
+          echo "container_id=$CID" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for Instagram to process media
+        env:
+          META_IG_ACCESS_TOKEN: ${{ secrets.META_IG_ACCESS_TOKEN }}
+          CONTAINER_ID: ${{ steps.container.outputs.container_id }}
+        run: |
+          TOKEN="$(printf '%s' "$META_IG_ACCESS_TOKEN" | tr -d '\r\n')"
+          for i in {1..20}; do
+            RESPONSE=$(curl -sS -G "https://graph.instagram.com/$CONTAINER_ID" \
+              --data-urlencode "fields=status_code,status" \
+              --data-urlencode "access_token=$TOKEN")
+            echo "$RESPONSE" > /tmp/status.json
+            STATUS=$(python3 - <<'PY'
+          import json
+          d=json.load(open("/tmp/status.json"))
+          if "error" in d:
+              print("ERROR")
+          else:
+              print(d.get("status_code",""))
+          PY
+            )
+            if [ "$STATUS" = "FINISHED" ]; then
+              echo "Instagram finished processing the Story."
+              exit 0
+            fi
+            if [ "$STATUS" = "ERROR" ]; then
+              cat /tmp/status.json
+              exit 1
+            fi
+            echo "Processing status: $STATUS"
+            sleep 3
+          done
+          echo "Instagram did not finish processing in time."
+          cat /tmp/status.json
+          exit 1
+
+      - name: Publish Instagram Story
+        env:
+          META_IG_ACCESS_TOKEN: ${{ secrets.META_IG_ACCESS_TOKEN }}
+          META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
+          CONTAINER_ID: ${{ steps.container.outputs.container_id }}
+        run: |
+          TOKEN="$(printf '%s' "$META_IG_ACCESS_TOKEN" | tr -d '\r\n')"
+          IG_ID="$(printf '%s' "$META_IG_USER_ID" | tr -d '\r\n ')"
+          RESPONSE=$(curl -sS -X POST "https://graph.instagram.com/$IG_ID/media_publish" \
+            --data-urlencode "creation_id=$CONTAINER_ID" \
+            --data-urlencode "access_token=$TOKEN")
+          echo "$RESPONSE" > /tmp/publish.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open("/tmp/publish.json"))
+          if "error" in d:
+              e=d["error"]
+              print("Instagram API error:", e.get("message"))
+              print("Error code:", e.get("code"))
+              raise SystemExit(1)
+          print("STORY PUBLISHED")
+          print("Instagram media id:", d.get("id"))
+          PY
