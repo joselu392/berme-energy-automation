@@ -1,49 +1,112 @@
 {
-  "week_start": "2026-09-14",
-  "week_end": "2026-09-20",
-  "weekly_mean_mwh": 132.05809523809523,
-  "weekly_mean_kwh": 0.13205809523809522,
-  "min_daily_mwh": 104.63270833333333,
-  "max_daily_mwh": 177.43645833333335,
-  "historical_max_mwh": 544.98,
-  "historical_max_date": "8 mar 2022",
-  "pct_vs_historical": -75.76826759916048,
-  "daily": [
+  "date": "2026-09-24",
+  "methodology": {
+    "scope": "Residencial España, tarifa 24h / precio único",
+    "metric": "Término de energía €/kWh sin impuestos",
+    "sample": 10,
+    "excludes": "potencia, cuotas, mantenimiento, servicios extra e impuestos",
+    "aggregation": "media aritmética simple de una tarifa seleccionada por comercializadora"
+  },
+  "average_eur_kwh": 0.123568,
+  "min": {
+    "name": "TotalEnergies",
+    "price_eur_kwh": 0.0999
+  },
+  "max": {
+    "name": "Holaluz",
+    "price_eur_kwh": 0.165
+  },
+  "change_vs_previous_pct": null,
+  "live_sources": 9,
+  "providers": [
     {
-      "date": "2026-09-14",
-      "mean_mwh": 177.43645833333335,
-      "periods": 96
+      "name": "Endesa",
+      "tariff": "Conecta Luz",
+      "price_eur_kwh": 0.11999,
+      "status": "live",
+      "source_url": "https://www.endesa.com/es/luz-y-gas/luz/conecta-de-endesa",
+      "errors": []
     },
     {
-      "date": "2026-09-15",
-      "mean_mwh": 167.32614583333333,
-      "periods": 96
+      "name": "Iberdrola",
+      "tariff": "Plan Online",
+      "price_eur_kwh": 0.1249,
+      "status": "bootstrap_seed",
+      "source_url": "https://www.iberdrola.es/luz/tarifas/plan-online",
+      "errors": [
+        "https://www.iberdrola.es/luz/tarifas/plan-online: HTTPError: 403 Client Error: Forbidden for url: https://www.iberdrola.es/luz/tarifas/plan-online",
+        "https://ifinanzas.es/energia/comparar/iberdrola-plan-online-vs-octopus-relax: ValueError: No se encontró un precio 24h válido"
+      ]
     },
     {
-      "date": "2026-09-16",
-      "mean_mwh": 104.63270833333333,
-      "periods": 96
+      "name": "Naturgy",
+      "tariff": "Tarifa Por Uso Luz",
+      "price_eur_kwh": 0.112,
+      "status": "live",
+      "source_url": "https://www.naturgy.es/precios_tarifauso_luz",
+      "errors": []
     },
     {
-      "date": "2026-09-17",
-      "mean_mwh": 127.41458333333333,
-      "periods": 96
+      "name": "Repsol",
+      "tariff": "Tarifa Sin Horarios",
+      "price_eur_kwh": 0.1199,
+      "status": "live_fallback_source",
+      "source_url": "https://selectra.es/energia/comparador/tarifa-luz",
+      "errors": [
+        "https://www.repsol.es/particulares/hogar/luz-y-gas/tarifas/plan-mixto-rl2/: ValueError: No se encontró un precio 24h válido"
+      ]
     },
     {
-      "date": "2026-09-18",
-      "mean_mwh": 124.77947916666666,
-      "periods": 96
+      "name": "TotalEnergies",
+      "tariff": "A tu Aire Siempre Luz",
+      "price_eur_kwh": 0.0999,
+      "status": "live",
+      "source_url": "https://www.totalenergies.es/es/hogares",
+      "errors": []
     },
     {
-      "date": "2026-09-19",
-      "mean_mwh": 110.25552083333334,
-      "periods": 96
+      "name": "Octopus",
+      "tariff": "Octopus Relax",
+      "price_eur_kwh": 0.129,
+      "status": "live",
+      "source_url": "https://octopusenergy.es/precios",
+      "errors": []
     },
     {
-      "date": "2026-09-20",
-      "mean_mwh": 112.56177083333334,
-      "periods": 96
+      "name": "Pepeenergy",
+      "tariff": "Tarifa Estable",
+      "price_eur_kwh": 0.126,
+      "status": "live",
+      "source_url": "https://www.pepeenergy.com/tarifas-luz",
+      "errors": []
+    },
+    {
+      "name": "Gana Energía",
+      "tariff": "Tarifa 24 horas",
+      "price_eur_kwh": 0.119,
+      "status": "live_fallback_source",
+      "source_url": "https://www.servalys.es/comercializadoras/ganaenergia/tarifas",
+      "errors": [
+        "https://ganaenergia.com/contratacion-luz?tid=6a103e94eeeae36be0aa992c: ValueError: No se encontró un precio 24h válido"
+      ]
+    },
+    {
+      "name": "Holaluz",
+      "tariff": "Tarifa Clásica online",
+      "price_eur_kwh": 0.165,
+      "status": "live_fallback_source",
+      "source_url": "https://www.tarifadeluzhoy.com/comparador/holaluz-octopus-energy",
+      "errors": [
+        "https://www.holaluz.com/luz/tarifas-luz: ValueError: No se encontró un precio 24h válido"
+      ]
+    },
+    {
+      "name": "Plenitude",
+      "tariff": "Fácil Plus Luz",
+      "price_eur_kwh": 0.11999,
+      "status": "live",
+      "source_url": "https://eniplenitude.es/",
+      "errors": []
     }
-  ],
-  "source": "OMIE - precios del mercado diario en España"
+  ]
 }
