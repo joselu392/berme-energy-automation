@@ -68,7 +68,7 @@ jobs:
           fi
 
       - name: Wait for public images
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish) || (github.event_name == 'push' && contains(github.event.head_commit.message, 'PUBLISH_BERME_STORIES_NOW'))
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish)
         run: |
           for FILE in story-weekly-electricity.jpg story-weekly-gas.jpg story-weekly-fuels.jpg; do
             URL="https://raw.githubusercontent.com/joselu392/berme-energy-automation/main/docs/$FILE?run=${GITHUB_RUN_ID}"
@@ -82,7 +82,7 @@ jobs:
           done
 
       - name: Publish 3 Stories sequentially
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish) || (github.event_name == 'push' && contains(github.event.head_commit.message, 'PUBLISH_BERME_STORIES_NOW'))
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish)
         env:
           META_IG_ACCESS_TOKEN: ${{ secrets.META_IG_ACCESS_TOKEN }}
           META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
