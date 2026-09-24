@@ -41,6 +41,7 @@ PROVIDERS = [
         "name": "Iberdrola",
         "tariff": "Plan Online",
         "url": "https://www.iberdrola.es/luz/tarifas/plan-online",
+        "fallback_url": "https://ifinanzas.es/energia/comparar/iberdrola-plan-online-vs-octopus-relax",
         "parser": "iberdrola",
         "seed": 0.1249,
     },
@@ -54,14 +55,14 @@ PROVIDERS = [
     {
         "name": "Repsol",
         "tariff": "Tarifa Sin Horarios",
-        "url": "https://www.repsol.es/particulares/hogar/luz-y-gas/tarifas/tarifa-sin-horarios/",
+        "url": "https://www.repsol.es/particulares/hogar/luz-y-gas/tarifas/plan-mixto-rl2/",
         "parser": "repsol",
         "seed": 0.119970,
     },
     {
         "name": "TotalEnergies",
         "tariff": "A tu Aire Siempre Luz",
-        "url": "https://www.totalenergies.es/es/hogares/tarifas-luz/a-tu-aire-siempre",
+        "url": "https://www.totalenergies.es/es/hogares",
         "parser": "totalenergies",
         "seed": 0.0999,
     },
@@ -92,6 +93,7 @@ PROVIDERS = [
         "name": "Holaluz",
         "tariff": "Tarifa Clásica online",
         "url": "https://www.holaluz.com/luz/tarifas-luz",
+        "fallback_url": "https://www.tarifadeluzhoy.com/comparador/holaluz-octopus-energy",
         "parser": "holaluz",
         "seed": 0.165,
     },
@@ -159,8 +161,10 @@ def parse_price(provider, text):
 
     if p == "iberdrola":
         return first_regex(text, [
+            r"subi[oó]\s+de\s+0[,.]\d+\s+a\s+(0[,.]\d{4,6})\s*€/kWh",
             r"Plan Online.{0,1000}?Las 24 horas del día\s*(0[,.]\d{4,6})\s*€/kWh",
             r"Plan Online.{0,1200}?Precio de energía consumida.{0,500}?(0[,.]\d{4,6})\s*€/kWh",
+            r"Plan Online.{0,1800}?(0[,.]\d{4,6})\s*€/kWh",
         ])
 
     if p == "naturgy":
@@ -173,12 +177,13 @@ def parse_price(provider, text):
         # We deliberately select the option WITHOUT Asistente 24h.
         idx = text.lower().find("no incluye asistente")
         if idx >= 0:
-            before = text[max(0, idx - 1600):idx]
+            before = text[max(0, idx - 2200):idx]
             vals = re.findall(r"(0[,.]\d{4,6})\s*€/kWh", before, flags=re.I)
             if vals:
                 return validate_price(num(vals[-1]))
         return first_regex(text, [
-            r"Tarifa Sin Horarios.{0,3500}?24 horas\s*(0[,.]\d{4,6})\s*€/kWh.{0,900}?No incluye asistente",
+            r"-7\s*%.{0,1000}?24 horas\s*(0[,.]\d{4,6})\s*€/kWh",
+            r"24 horas\s*(0[,.]\d{4,6})\s*€/kWh.{0,1200}?No incluye asistente",
         ])
 
     if p == "totalenergies":
@@ -195,8 +200,9 @@ def parse_price(provider, text):
 
     if p == "pepeenergy":
         return first_regex(text, [
-            r"Tarifa Estable de Luz.{0,650}?(0[,.]\d{4,6})\s*€/kWh",
-            r"Mismo precio todo el d[ií]a.{0,250}?(0[,.]\d{4,6})\s*€/kWh",
+            r"La del mismo precio todo el d[ií]a\s*(0[,.]\d{4,6})\s*€/kWh",
+            r"Tarifa Estable de Luz.{0,300}?(0[,.]\d{4,6})\s*€/kWh",
+            r"Mismo precio todo el d[ií]a:\s*(0[,.]\d{4,6})\s*€/kWh",
         ])
 
     if p == "gana":
@@ -207,8 +213,9 @@ def parse_price(provider, text):
 
     if p == "holaluz":
         return first_regex(text, [
+            r"Descuentos publicados.{0,250}?(0[,.]\d{3,6})\s*€/kWh",
             r"Tarifa Cl[aá]sica.{0,900}?Si contratas online:\s*(0[,.]\d{3,6})\s*€/kWh",
-            r"Precio 24 horas\s*(0[,.]\d{3,6})\s*€/kWh\s*Si contratas online:\s*(0[,.]\d{3,6})\s*€/kWh",
+            r"Si contratas online:\s*(0[,.]\d{3,6})\s*€/kWh",
         ])
 
     if p == "plenitude":
