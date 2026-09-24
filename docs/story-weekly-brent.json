@@ -1,0 +1,33 @@
+{
+  "week_start": "2026-09-14",
+  "week_end": "2026-09-20",
+  "weekly_mean_eur_bbl": 107.81926684642448,
+  "min_eur_bbl": 104.41535776614312,
+  "max_eur_bbl": 113.35471011352806,
+  "historical_max_eur_bbl": 122.22,
+  "historical_max_date": "2022-03-08",
+  "pct_vs_historical": -11.782632264421133,
+  "daily": [
+    {
+      "date": "2026-09-14",
+      "eur_bbl": 104.96926673015324
+    },
+    {
+      "date": "2026-09-15",
+      "eur_bbl": 113.35471011352806
+    },
+    {
+      "date": "2026-09-16",
+      "eur_bbl": 110.80870243564186
+    },
+    {
+      "date": "2026-09-17",
+      "eur_bbl": 105.54829718665623
+    },
+    {
+      "date": "2026-09-18",
+      "eur_bbl": 104.41535776614312
+    }
+  ],
+  "source": "EIA Brent Europe spot + EUR/USD de referencia"
+}

@@ -1,0 +1,42 @@
+{
+  "week_start": "2026-09-14",
+  "week_end": "2026-09-20",
+  "weekly_mean_mwh": 82.28285714285714,
+  "weekly_mean_kwh": 0.08228285714285714,
+  "min_mwh": 78.81,
+  "max_mwh": 85.71,
+  "historical_max_mwh": 240.0,
+  "historical_max_date": "29 ago 2022",
+  "pct_vs_historical": -65.7154761904762,
+  "daily": [
+    {
+      "date": "2026-09-14",
+      "price_mwh": 84.96
+    },
+    {
+      "date": "2026-09-15",
+      "price_mwh": 85.71
+    },
+    {
+      "date": "2026-09-16",
+      "price_mwh": 83.1
+    },
+    {
+      "date": "2026-09-17",
+      "price_mwh": 80.24
+    },
+    {
+      "date": "2026-09-18",
+      "price_mwh": 78.81
+    },
+    {
+      "date": "2026-09-19",
+      "price_mwh": 81.96
+    },
+    {
+      "date": "2026-09-20",
+      "price_mwh": 81.2
+    }
+  ],
+  "source": "MIBGAS PVB - producto Diario (D+1)"
+}
