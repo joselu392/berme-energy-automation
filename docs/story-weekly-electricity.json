@@ -7,7 +7,7 @@
     "excludes": "potencia, cuotas, mantenimiento, servicios extra e impuestos",
     "aggregation": "media aritmética simple de una tarifa seleccionada por comercializadora"
   },
-  "average_eur_kwh": 0.123568,
+  "average_eur_kwh": 0.123948,
   "min": {
     "name": "TotalEnergies",
     "price_eur_kwh": 0.0999
@@ -32,9 +32,9 @@
       "tariff": "Plan Online",
       "price_eur_kwh": 0.1249,
       "status": "bootstrap_seed",
-      "source_url": "https://www.iberdrola.es/luz/tarifas/plan-online",
+      "source_url": "https://www.iberdrola.es/luz/tarifas",
       "errors": [
-        "https://www.iberdrola.es/luz/tarifas/plan-online: HTTPError: 403 Client Error: Forbidden for url: https://www.iberdrola.es/luz/tarifas/plan-online",
+        "https://www.iberdrola.es/luz/tarifas: HTTPError: 403 Client Error: Forbidden for url: https://www.iberdrola.es/luz/tarifas",
         "https://ifinanzas.es/energia/comparar/iberdrola-plan-online-vs-octopus-relax: ValueError: No se encontró un precio 24h válido"
       ]
     },
@@ -75,9 +75,9 @@
     {
       "name": "Pepeenergy",
       "tariff": "Tarifa Estable",
-      "price_eur_kwh": 0.126,
+      "price_eur_kwh": 0.1298,
       "status": "live",
-      "source_url": "https://www.pepeenergy.com/tarifas-luz",
+      "source_url": "https://www.pepeenergy.com/",
       "errors": []
     },
     {
