@@ -44,7 +44,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install pillow requests xlrd openpyxl
+        run: pip install pillow requests xlrd openpyxl beautifulsoup4
 
       - name: Generate fixed electricity template
         run: python stories/electricity_weekly.py
