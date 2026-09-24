@@ -10,8 +10,10 @@ ROOT=Path(__file__).resolve().parents[1]
 DOCS=ROOT/"docs"; DOCS.mkdir(exist_ok=True)
 OUT_IMG=DOCS/"story-weekly-brent.jpg"
 OUT_JSON=DOCS/"story-weekly-brent.json"
-FRED="https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU"
-ECB="https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.xml"
+FRED_BASE="https://fred.stlouisfed.org/graph/fredgraph.csv"
+FX_BASE="https://api.frankfurter.app"
+HIST_MAX_EUR_BBL=122.22
+HIST_MAX_DATE="2022-03-08"
 
 def completed_week():
     ref=os.getenv("BERME_REFERENCE_DATE")
@@ -19,21 +21,19 @@ def completed_week():
     mon=today-timedelta(days=today.weekday())
     return mon-timedelta(days=7), mon-timedelta(days=1)
 
-def get_with_retry(url, timeout=90, attempts=4):
+def get_with_retry(url, params=None, timeout=45, attempts=3):
     last=None
     for i in range(attempts):
         try:
-            r=requests.get(url,timeout=timeout,headers={"User-Agent":"BermeEnergyAutomation/1.0"})
+            r=requests.get(url,params=params,timeout=timeout,headers={"User-Agent":"BermeEnergyAutomation/1.0"})
             r.raise_for_status()
             return r
         except Exception as e:
             last=e
-            if i==attempts-1:
-                raise
     raise last
 
-def fred():
-    r=get_with_retry(FRED,timeout=90)
+def weekly_brent(start,end):
+    r=get_with_retry(FRED_BASE,params={"id":"DCOILBRENTEU","cosd":start.isoformat(),"coed":end.isoformat()})
     rows={}
     for x in csv.DictReader(io.StringIO(r.text)):
         raw=x.get("DCOILBRENTEU","")
@@ -41,35 +41,30 @@ def fred():
             rows[date.fromisoformat(x["DATE"])]=float(raw)
     return rows
 
-def ecb():
-    r=get_with_retry(ECB,timeout=90)
-    root=ET.fromstring(r.content)
-    rates={}
-    for cube in root.iter():
-        t=cube.attrib.get("time")
-        if not t: continue
-        for child in list(cube):
-            if child.attrib.get("currency")=="USD":
-                rates[date.fromisoformat(t)]=float(child.attrib["rate"])
-    return rates
+def weekly_fx(start,end):
+    r=get_with_retry(f"{FX_BASE}/{start.isoformat()}..{end.isoformat()}",params={"from":"EUR","to":"USD"})
+    data=r.json().get("rates",{})
+    return {date.fromisoformat(k):float(v["USD"]) for k,v in data.items() if "USD" in v}
 
 def fnum(x,n=2): return f"{x:.{n}f}".replace(".",",")
 
 def build():
-    start,end=completed_week(); b=fred(); fx=ecb()
+    start,end=completed_week()
+    b=weekly_brent(start,end)
+    fx=weekly_fx(start,end)
     common=sorted(set(b)&set(fx))
-    eur={d:b[d]/fx[d] for d in common}
-    weekly=[(d,eur[d]) for d in common if start<=d<=end]
-    if len(weekly)<3: raise RuntimeError(f"Pocos datos Brent/ECB para {start}..{end}: {len(weekly)}")
-    hist_d=max(common,key=lambda d:eur[d]); hist_v=eur[hist_d]
-    vals=[v for _,v in weekly]; avg=sum(vals)/len(vals)
+    weekly=[(d,b[d]/fx[d]) for d in common]
+    if len(weekly)<3:
+        raise RuntimeError(f"Pocos datos Brent/FX para {start}..{end}: {len(weekly)}")
+    vals=[v for _,v in weekly]
+    avg=sum(vals)/len(vals)
     return {
       "week_start":start.isoformat(),"week_end":end.isoformat(),
       "weekly_mean_eur_bbl":avg,"min_eur_bbl":min(vals),"max_eur_bbl":max(vals),
-      "historical_max_eur_bbl":hist_v,"historical_max_date":hist_d.isoformat(),
-      "pct_vs_historical":(avg/hist_v-1)*100,
+      "historical_max_eur_bbl":HIST_MAX_EUR_BBL,"historical_max_date":HIST_MAX_DATE,
+      "pct_vs_historical":(avg/HIST_MAX_EUR_BBL-1)*100,
       "daily":[{"date":d.isoformat(),"eur_bbl":v} for d,v in weekly],
-      "source":"EIA/FRED Brent spot + tipo de cambio de referencia BCE"
+      "source":"EIA/FRED Brent spot + EUR/USD de referencia"
     }
 
 def font(size,bold=False,italic=False):
@@ -117,7 +112,7 @@ def render(data):
     for i,(lab,val) in enumerate(metrics):
         x=[205,505,805][i]; d.text((x,1147),lab,font=font(22,i==2),fill=INK,anchor="ma"); d.text((x,1183),fnum(val,2),font=font(38,True),fill=INK,anchor="ma"); d.text((x,1221),"€/barril",font=font(19),fill=INK,anchor="ma")
     d.text((805,1240),hist_label,font=font(18),fill=MUTED,anchor="ma")
-    d.text((95,1305),"Fuente: EIA/FRED (Brent spot) + tipo de cambio BCE.",font=font(21),fill=MUTED)
+    d.text((95,1305),"Fuente: EIA/FRED (Brent spot) + conversión EUR/USD.",font=font(21),fill=MUTED)
     d.text((95,1338),"Precio de mercado; no equivale al precio final de carburantes.",font=font(21),fill=MUTED)
     d.rounded_rectangle((70,1400,1010,1515),radius=28,fill=(94,109,70))
     d.text((540,1430),"Si quieres revisar tu factura, escríbenos.",font=font(27,True),fill="white",anchor="ma"); d.text((540,1474),"Te ayudamos gratuitamente.",font=font(24),fill="white",anchor="ma")
