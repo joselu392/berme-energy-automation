@@ -23,13 +23,20 @@ jobs:
           META_IG_ACCESS_TOKEN: ${{ secrets.META_IG_ACCESS_TOKEN }}
           META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
         run: |
-          HTTP_CODE=$(curl -sS -o /tmp/ig-response.json -w "%{http_code}" \
-            -H "Authorization: Bearer $META_IG_ACCESS_TOKEN" \
-            "https://graph.instagram.com/$META_IG_USER_ID?fields=user_id,username")
+          TOKEN="$(printf '%s' "$META_IG_ACCESS_TOKEN" | tr -d '\r\n')"
+          EXPECTED_ID="$(printf '%s' "$META_IG_USER_ID" | tr -d '\r\n ')"
+
+          HTTP_CODE=$(curl -sS -G -o /tmp/ig-response.json -w "%{http_code}" \
+            "https://graph.instagram.com/me" \
+            --data-urlencode "fields=id,user_id,username" \
+            --data-urlencode "access_token=$TOKEN")
+
+          export HTTP_CODE EXPECTED_ID
 
           python3 - <<'PY'
-          import json
+          import json, os
           from pathlib import Path
+
           p = Path("/tmp/ig-response.json")
           try:
               data = json.loads(p.read_text())
@@ -44,9 +51,20 @@ jobs:
               print("Error code:", err.get("code", "unknown"))
               raise SystemExit(1)
 
+          http_code = int(os.environ["HTTP_CODE"])
+          if not 200 <= http_code < 300:
+              print("Unexpected HTTP status:", http_code)
+              raise SystemExit(1)
+
+          returned_id = str(data.get("user_id") or data.get("id") or "")
+          expected_id = os.environ["EXPECTED_ID"]
+
           print("Connection OK")
           print("Instagram username:", data.get("username", "(not returned)"))
           print("Instagram user object resolved successfully.")
-          PY
 
-          test "$HTTP_CODE" -ge 200 -a "$HTTP_CODE" -lt 300
+          if expected_id and returned_id and expected_id != returned_id:
+              print("Warning: returned Instagram user ID does not match META_IG_USER_ID.")
+              print("Returned ID:", returned_id)
+              raise SystemExit(1)
+          PY
