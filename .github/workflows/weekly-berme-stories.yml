@@ -1,0 +1,119 @@
+name: Weekly Berme Stories
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "stories/gas_weekly.py"
+      - "stories/brent_weekly.py"
+      - ".github/workflows/weekly-berme-stories.yml"
+  schedule:
+    - cron: "0 8 * * 1"
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publicar las 3 Stories en Instagram"
+        required: true
+        default: false
+        type: boolean
+      reference_date:
+        description: "Fecha de referencia YYYY-MM-DD (vacío = hoy)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weekly-berme-stories
+  cancel-in-progress: false
+
+jobs:
+  stories:
+    runs-on: ubuntu-latest
+    env:
+      BERME_REFERENCE_DATE: ${{ github.event.inputs.reference_date }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install pillow requests
+      - name: Generate electricity
+        run: python stories/electricity_weekly.py
+      - name: Generate gas
+        run: python stories/gas_weekly.py
+      - name: Generate Brent
+        run: python stories/brent_weekly.py
+      - name: Commit previews
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/story-weekly-electricity.jpg docs/story-weekly-electricity.json docs/story-weekly-gas.jpg docs/story-weekly-gas.json docs/story-weekly-brent.jpg docs/story-weekly-brent.json
+          if git diff --cached --quiet; then
+            echo "Previews unchanged."
+          else
+            git commit -m "Update weekly Berme Stories"
+            git push
+          fi
+
+      - name: Wait for public images
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish)
+        run: |
+          for FILE in story-weekly-electricity.jpg story-weekly-gas.jpg story-weekly-brent.jpg; do
+            URL="https://raw.githubusercontent.com/joselu392/berme-energy-automation/main/docs/$FILE?run=${GITHUB_RUN_ID}"
+            ok=0
+            for i in {1..30}; do
+              CODE=$(curl -L -s -o /dev/null -w "%{http_code}" "$URL")
+              if [ "$CODE" = "200" ]; then ok=1; break; fi
+              sleep 3
+            done
+            [ "$ok" = "1" ] || exit 1
+          done
+
+      - name: Publish 3 Stories sequentially
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish)
+        env:
+          META_IG_ACCESS_TOKEN: ${{ secrets.META_IG_ACCESS_TOKEN }}
+          META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
+        run: |
+          set -e
+          TOKEN="$(printf '%s' "$META_IG_ACCESS_TOKEN" | tr -d '\r\n')"
+          IG_ID="$(printf '%s' "$META_IG_USER_ID" | tr -d '\r\n ')"
+
+          publish_story () {
+            FILE="$1"
+            IMAGE_URL="https://raw.githubusercontent.com/joselu392/berme-energy-automation/main/docs/$FILE?run=${GITHUB_RUN_ID}"
+            RESPONSE=$(curl -sS -X POST "https://graph.instagram.com/$IG_ID/media" \
+              --data-urlencode "media_type=STORIES" \
+              --data-urlencode "image_url=$IMAGE_URL" \
+              --data-urlencode "access_token=$TOKEN")
+            echo "$RESPONSE" >/tmp/container.json
+            CID=$(python3 - <<'PY'
+          import json
+          d=json.load(open("/tmp/container.json"))
+          if "error" in d:
+              raise SystemExit(d["error"].get("message"))
+          print(d["id"])
+          PY
+            )
+            for i in {1..30}; do
+              STATUS=$(curl -sS -G "https://graph.instagram.com/$CID" \
+                --data-urlencode "fields=status_code" \
+                --data-urlencode "access_token=$TOKEN" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status_code","ERROR"))')
+              [ "$STATUS" = "FINISHED" ] && break
+              [ "$STATUS" = "ERROR" ] && exit 1
+              sleep 3
+            done
+            PUB=$(curl -sS -X POST "https://graph.instagram.com/$IG_ID/media_publish" \
+              --data-urlencode "creation_id=$CID" \
+              --data-urlencode "access_token=$TOKEN")
+            echo "$PUB" | python3 -c 'import json,sys; d=json.load(sys.stdin); print("PUBLISHED", d.get("id") or d); exit(1 if "error" in d else 0)'
+          }
+
+          publish_story "story-weekly-electricity.jpg"
+          sleep 30
+          publish_story "story-weekly-gas.jpg"
+          sleep 30
+          publish_story "story-weekly-brent.jpg"
