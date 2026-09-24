@@ -6,8 +6,6 @@ on:
     paths:
       - "stories/electricity_weekly.py"
       - ".github/workflows/weekly-electricity-story.yml"
-  schedule:
-    - cron: "0 8 * * 1"
   workflow_dispatch:
     inputs:
       publish:
@@ -58,7 +56,7 @@ jobs:
           fi
 
       - name: Wait for public preview
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish) || (github.event_name == 'push' && contains(github.event.head_commit.message, 'PUBLISH_WEEKLY_ELECTRICITY_NOW'))
+        if: (github.event_name == 'workflow_dispatch' && inputs.publish) || (github.event_name == 'push' && contains(github.event.head_commit.message, 'PUBLISH_WEEKLY_ELECTRICITY_NOW'))
         run: |
           URL="https://raw.githubusercontent.com/joselu392/berme-energy-automation/main/docs/story-weekly-electricity.jpg?run=${GITHUB_RUN_ID}"
           for i in {1..30}; do
@@ -69,7 +67,7 @@ jobs:
           exit 1
 
       - name: Create Story container
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish) || (github.event_name == 'push' && contains(github.event.head_commit.message, 'PUBLISH_WEEKLY_ELECTRICITY_NOW'))
+        if: (github.event_name == 'workflow_dispatch' && inputs.publish) || (github.event_name == 'push' && contains(github.event.head_commit.message, 'PUBLISH_WEEKLY_ELECTRICITY_NOW'))
         id: container
         env:
           META_IG_ACCESS_TOKEN: ${{ secrets.META_IG_ACCESS_TOKEN }}
@@ -95,7 +93,7 @@ jobs:
           echo "container_id=$CID" >> "$GITHUB_OUTPUT"
 
       - name: Wait for processing
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish) || (github.event_name == 'push' && contains(github.event.head_commit.message, 'PUBLISH_WEEKLY_ELECTRICITY_NOW'))
+        if: (github.event_name == 'workflow_dispatch' && inputs.publish) || (github.event_name == 'push' && contains(github.event.head_commit.message, 'PUBLISH_WEEKLY_ELECTRICITY_NOW'))
         env:
           META_IG_ACCESS_TOKEN: ${{ secrets.META_IG_ACCESS_TOKEN }}
           CONTAINER_ID: ${{ steps.container.outputs.container_id }}
@@ -113,7 +111,7 @@ jobs:
           exit 1
 
       - name: Publish Story
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish) || (github.event_name == 'push' && contains(github.event.head_commit.message, 'PUBLISH_WEEKLY_ELECTRICITY_NOW'))
+        if: (github.event_name == 'workflow_dispatch' && inputs.publish) || (github.event_name == 'push' && contains(github.event.head_commit.message, 'PUBLISH_WEEKLY_ELECTRICITY_NOW'))
         env:
           META_IG_ACCESS_TOKEN: ${{ secrets.META_IG_ACCESS_TOKEN }}
           META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
