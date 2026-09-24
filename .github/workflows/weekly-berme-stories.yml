@@ -1,4 +1,5 @@
 name: Weekly Berme Stories
+# Fixed Berme Energy templates; only data changes weekly.
 
 on:
   push:
