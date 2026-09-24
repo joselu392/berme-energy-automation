@@ -19,8 +19,21 @@ def completed_week():
     mon=today-timedelta(days=today.weekday())
     return mon-timedelta(days=7), mon-timedelta(days=1)
 
+def get_with_retry(url, timeout=90, attempts=4):
+    last=None
+    for i in range(attempts):
+        try:
+            r=requests.get(url,timeout=timeout,headers={"User-Agent":"BermeEnergyAutomation/1.0"})
+            r.raise_for_status()
+            return r
+        except Exception as e:
+            last=e
+            if i==attempts-1:
+                raise
+    raise last
+
 def fred():
-    r=requests.get(FRED,timeout=30,headers={"User-Agent":"BermeEnergyAutomation/1.0"}); r.raise_for_status()
+    r=get_with_retry(FRED,timeout=90)
     rows={}
     for x in csv.DictReader(io.StringIO(r.text)):
         raw=x.get("DCOILBRENTEU","")
@@ -29,7 +42,7 @@ def fred():
     return rows
 
 def ecb():
-    r=requests.get(ECB,timeout=30,headers={"User-Agent":"BermeEnergyAutomation/1.0"}); r.raise_for_status()
+    r=get_with_retry(ECB,timeout=90)
     root=ET.fromstring(r.content)
     rates={}
     for cube in root.iter():
