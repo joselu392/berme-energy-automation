@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import base64
+import io
 import json
 import os
 import re
@@ -56,6 +58,7 @@ PROVIDERS = [
         "name": "Repsol",
         "tariff": "Tarifa Sin Horarios",
         "url": "https://www.repsol.es/particulares/hogar/luz-y-gas/tarifas/plan-mixto-rl2/",
+        "fallback_url": "https://selectra.es/energia/comparador/tarifa-luz",
         "parser": "repsol",
         "seed": 0.119970,
     },
@@ -161,10 +164,12 @@ def parse_price(provider, text):
 
     if p == "iberdrola":
         return first_regex(text, [
+            r"Mismo precio de energ[ií]a las 24 horas:\s*(0[,.]\d{4,6})\s*€/kWh",
+            r"Precio de la energ[ií]a en punta.{0,120}?(0[,.]\d{4,6})\s*€/kWh",
             r"subi[oó]\s+de\s+0[,.]\d+\s+a\s+(0[,.]\d{4,6})\s*€/kWh",
             r"Plan Online.{0,1000}?Las 24 horas del día\s*(0[,.]\d{4,6})\s*€/kWh",
             r"Plan Online.{0,1200}?Precio de energía consumida.{0,500}?(0[,.]\d{4,6})\s*€/kWh",
-            r"Plan Online.{0,1800}?(0[,.]\d{4,6})\s*€/kWh",
+            r"Plan Online.{0,2200}?(0[,.]\d{4,6})\s*€/kWh",
         ])
 
     if p == "naturgy":
@@ -182,6 +187,8 @@ def parse_price(provider, text):
             if vals:
                 return validate_price(num(vals[-1]))
         return first_regex(text, [
+            r"Tarifa Sin Horarios.{0,350}?(0[,.]\d{4,6})\s*€/kWh",
+            r"Sin Horarios.{0,1000}?CONSUMO.{0,250}?(0[,.]\d{4,6})\s*€/\s*kWh",
             r"-7\s*%.{0,1000}?24 horas\s*(0[,.]\d{4,6})\s*€/kWh",
             r"24 horas\s*(0[,.]\d{4,6})\s*€/kWh.{0,1200}?No incluye asistente",
         ])
@@ -199,11 +206,17 @@ def parse_price(provider, text):
         ])
 
     if p == "pepeenergy":
-        return first_regex(text, [
-            r"La del mismo precio todo el d[ií]a\s*(0[,.]\d{4,6})\s*€/kWh",
-            r"Tarifa Estable de Luz.{0,300}?(0[,.]\d{4,6})\s*€/kWh",
-            r"Mismo precio todo el d[ií]a:\s*(0[,.]\d{4,6})\s*€/kWh",
-        ])
+        idx = text.lower().find("tarifa estable de luz")
+        block = text[idx:idx+850] if idx >= 0 else text
+        vals = [
+            validate_price(num(v))
+            for v in re.findall(r"(0[,.]\d{4,6})\s*€/kWh", block, flags=re.I)
+        ]
+        if vals:
+            # The same block also contains Canary/with-tax examples; the
+            # mainland pre-tax energy term is the lowest published value.
+            return min(vals)
+        raise ValueError("No se encontró el precio estable de Pepeenergy")
 
     if p == "gana":
         return first_regex(text, [
@@ -366,14 +379,16 @@ def fmt(v, decimals=3):
     return f"{v:.{decimals}f}".replace(".", ",")
 
 def paste_bulb(img):
-    asset = ASSETS / "bulb_approved.jpg"
-    if not asset.exists():
+    # Exact approved bulb crop is stored as base64 text so GitHub keeps the
+    # asset byte-perfect through the connector.
+    asset_b64 = ASSETS / "bulb_approved.b64"
+    if not asset_b64.exists():
         return
-    bulb = Image.open(asset).convert("RGB")
+    raw = base64.b64decode(asset_b64.read_text(encoding="utf-8").strip())
+    bulb = Image.open(io.BytesIO(raw)).convert("RGB")
     target_w = 330
     target_h = round(bulb.height * target_w / bulb.width)
     bulb = bulb.resize((target_w, target_h), Image.Resampling.LANCZOS)
-    # The approved crop already contains the same warm background.
     img.paste(bulb, (750, 205))
 
 def render(data):
