@@ -43,7 +43,6 @@ PROVIDERS = [
         "name": "Iberdrola",
         "tariff": "Plan Estable",
         "url": "https://www.iberdrola.es/luz/tarifas/plan-estable",
-        "fallback_url": "https://www.servalys.es/comercializadoras/iberdrola",
         "parser": "iberdrola",
         "seed": 0.148644,
     },
@@ -66,6 +65,7 @@ PROVIDERS = [
         "name": "TotalEnergies",
         "tariff": "A tu Aire Siempre Luz",
         "url": "https://www.totalenergies.es/es/hogares/tarifas-luz/a-tu-aire-siempre",
+        "fallback_url": "https://kilowattio.es/",
         "parser": "totalenergies",
         "seed": 0.0999,
     },
@@ -89,7 +89,7 @@ PROVIDERS = [
         "name": "Gana Energía",
         "tariff": "Tarifa 24 horas",
         "url": "https://ganaenergia.com/contratacion-luz?tid=6a103e94eeeae36be0aa992c",
-        "fallback_url": "https://www.tarifadeluzhoy.com/comparador/companias-luz-baratas",
+        "fallback_url": "https://www.servalys.es/comercializadoras/ganaenergia/tarifas",
         "parser": "gana",
         "seed": 0.1190,
     },
@@ -195,6 +195,7 @@ def parse_price(provider, text):
 
     if p == "totalenergies":
         return first_regex(text, [
+            r"TotalEnergies\s+A Tu Aire Siempre.{0,250}?(0[,.]\d{4,6})\s*€/kWh",
             r"Precio (?:de )?luz\s*(0[,.]\d{4,6})\s*€/kWh",
             r"Precio sin impuestos\s*(0[,.]\d{4,6})\s*€/kWh\s*24 horas",
             r"A tu Aire Siempre Luz.{0,1400}?(0[,.]\d{4,6})\s*€/kWh",
