@@ -7,7 +7,7 @@
     "excludes": "potencia, cuotas, mantenimiento, servicios extra e impuestos",
     "aggregation": "media aritmética simple de una tarifa seleccionada por comercializadora"
   },
-  "average_eur_kwh": 0.123948,
+  "average_eur_kwh": 0.127448,
   "min": {
     "name": "TotalEnergies",
     "price_eur_kwh": 0.0999
@@ -17,7 +17,7 @@
     "price_eur_kwh": 0.165
   },
   "change_vs_previous_pct": null,
-  "live_sources": 9,
+  "live_sources": 10,
   "providers": [
     {
       "name": "Endesa",
@@ -30,12 +30,11 @@
     {
       "name": "Iberdrola",
       "tariff": "Plan Online",
-      "price_eur_kwh": 0.1249,
-      "status": "bootstrap_seed",
-      "source_url": "https://www.iberdrola.es/luz/tarifas",
+      "price_eur_kwh": 0.1499,
+      "status": "live_fallback_source",
+      "source_url": "https://luzometro.com/companias-luz/iberdrola",
       "errors": [
-        "https://www.iberdrola.es/luz/tarifas: HTTPError: 403 Client Error: Forbidden for url: https://www.iberdrola.es/luz/tarifas",
-        "https://ifinanzas.es/energia/comparar/iberdrola-plan-online-vs-octopus-relax: ValueError: No se encontró un precio 24h válido"
+        "https://www.iberdrola.es/luz/tarifas: HTTPError: 403 Client Error: Forbidden for url: https://www.iberdrola.es/luz/tarifas"
       ]
     },
     {
@@ -83,9 +82,9 @@
     {
       "name": "Gana Energía",
       "tariff": "Tarifa 24 horas",
-      "price_eur_kwh": 0.119,
+      "price_eur_kwh": 0.129,
       "status": "live_fallback_source",
-      "source_url": "https://www.servalys.es/comercializadoras/ganaenergia/tarifas",
+      "source_url": "https://www.tarifadeluzhoy.com/comparador/companias-luz-baratas",
       "errors": [
         "https://ganaenergia.com/contratacion-luz?tid=6a103e94eeeae36be0aa992c: ValueError: No se encontró un precio 24h válido"
       ]
