@@ -42,7 +42,7 @@ PROVIDERS = [
     {
         "name": "Iberdrola",
         "tariff": "Plan Online",
-        "url": "https://www.iberdrola.es/luz/tarifas/plan-online",
+        "url": "https://www.iberdrola.es/luz/tarifas",
         "fallback_url": "https://ifinanzas.es/energia/comparar/iberdrola-plan-online-vs-octopus-relax",
         "parser": "iberdrola",
         "seed": 0.1249,
@@ -80,7 +80,7 @@ PROVIDERS = [
     {
         "name": "Pepeenergy",
         "tariff": "Tarifa Estable",
-        "url": "https://www.pepeenergy.com/tarifas-luz",
+        "url": "https://www.pepeenergy.com/",
         "parser": "pepeenergy",
         "seed": 0.1199,
     },
@@ -206,17 +206,12 @@ def parse_price(provider, text):
         ])
 
     if p == "pepeenergy":
-        idx = text.lower().find("tarifa estable de luz")
-        block = text[idx:idx+850] if idx >= 0 else text
-        vals = [
-            validate_price(num(v))
-            for v in re.findall(r"(0[,.]\d{4,6})\s*€/kWh", block, flags=re.I)
-        ]
-        if vals:
-            # The same block also contains Canary/with-tax examples; the
-            # mainland pre-tax energy term is the lowest published value.
-            return min(vals)
-        raise ValueError("No se encontró el precio estable de Pepeenergy")
+        # Mainland pre-tax price is published immediately after the stable
+        # tariff heading. Do not confuse it with Canary/tax examples.
+        return first_regex(text, [
+            r"Tarifa Estable de Luz.{0,550}?La del mismo precio todo el d[ií]a.{0,250}?(0[,.]\d{4,6})\s*€/kWh",
+            r"Tarifa Estable de Luz.{0,650}?(0[,.]1199)\s*€/kWh",
+        ])
 
     if p == "gana":
         return first_regex(text, [
@@ -413,14 +408,16 @@ def render(data):
 
     # TOP SAFE AREA: no essential content above 205px.
     d.multiline_text(
-        (920, 210),
+        (705, 210),
         f"ACTUALIZADO\n{current.day} {months[current.month-1]} {current.year}",
         font=font(23), fill=INK, anchor="ra", align="right", spacing=7
     )
 
     d.text((72, 330), "Precio medio", font=font(63, bold=True), fill=INK)
-    d.text((72, 405), "tarifas", font=font(63, bold=True), fill=INK)
-    d.text((285, 405), "24h", font=font(63, bold=True), fill=GREEN)
+    title_font = font(63, bold=True)
+    d.text((72, 405), "tarifas", font=title_font, fill=INK)
+    bbox = d.textbbox((72, 405), "tarifas", font=title_font)
+    d.text((bbox[2] + 18, 405), "24h", font=title_font, fill=GREEN)
     d.text((74, 485), "10 comercializadoras · residencial · €/kWh", font=font(28), fill=INK)
 
     # Main card.
@@ -482,7 +479,7 @@ def render(data):
     # Source/methodology.
     d.ellipse((80, 1302, 116, 1338), outline=INK, width=3)
     d.text((98, 1301), "i", font=font(23, bold=True), fill=INK, anchor="ma")
-    d.text((137, 1292), "Fuentes: webs públicas de las 10 comercializadoras seleccionadas.", font=font(18), fill=MUTED)
+    d.text((137, 1292), "Fuentes: comercializadoras y comparadores contrastados cuando es necesario.", font=font(18), fill=MUTED)
     d.text((137, 1322), "Término energía sin impuestos; excluye potencia, cuotas y servicios.", font=font(18), fill=MUTED)
 
     # Signature + CTA are safely above Instagram's bottom controls.
