@@ -291,7 +291,10 @@ def collect_prices():
             "errors": errors[-2:],
         })
 
-    for r in rows:\n        print("TARIFF_STATUS", r["name"], r["status"], r["price_eur_kwh"], " | ".join(r.get("errors", [])))\n\n    valid = [r for r in rows if isinstance(r["price_eur_kwh"], (int, float))]
+    for r in rows:
+        print("TARIFF_STATUS", r["name"], r["status"], r["price_eur_kwh"], " | ".join(r.get("errors", [])))
+
+    valid = [r for r in rows if isinstance(r["price_eur_kwh"], (int, float))]
     non_seed = [r for r in valid if not r["status"].startswith("bootstrap")]
     # Publishing-quality guardrail: 10 prices available and at least 8 freshly fetched
     # (the remaining 2 may use a recent cached value if a website is temporarily down).
