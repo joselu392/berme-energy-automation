@@ -7,7 +7,7 @@
     "excludes": "potencia, cuotas, mantenimiento, servicios extra e impuestos",
     "aggregation": "media aritmética simple de una tarifa seleccionada por comercializadora"
   },
-  "average_eur_kwh": 0.1247587,
+  "average_eur_kwh": 0.1258931,
   "min": {
     "name": "TotalEnergies",
     "price_eur_kwh": 0.0999
@@ -30,9 +30,9 @@
     {
       "name": "Iberdrola",
       "tariff": "Plan Estable",
-      "price_eur_kwh": 0.1273,
-      "status": "live_fallback_source",
-      "source_url": "https://www.servalys.es/comercializadoras/iberdrola",
+      "price_eur_kwh": 0.148644,
+      "status": "bootstrap_seed",
+      "source_url": "https://www.iberdrola.es/luz/tarifas/plan-estable",
       "errors": [
         "https://www.iberdrola.es/luz/tarifas/plan-estable: HTTPError: 403 Client Error: Forbidden for url: https://www.iberdrola.es/luz/tarifas/plan-estable"
       ]
@@ -59,8 +59,8 @@
       "name": "TotalEnergies",
       "tariff": "A tu Aire Siempre Luz",
       "price_eur_kwh": 0.0999,
-      "status": "bootstrap_seed",
-      "source_url": "https://www.totalenergies.es/es/hogares/tarifas-luz/a-tu-aire-siempre",
+      "status": "live_fallback_source",
+      "source_url": "https://kilowattio.es/",
       "errors": [
         "https://www.totalenergies.es/es/hogares/tarifas-luz/a-tu-aire-siempre: ValueError: No se encontró un precio 24h válido"
       ]
@@ -84,9 +84,9 @@
     {
       "name": "Gana Energía",
       "tariff": "Tarifa 24 horas",
-      "price_eur_kwh": 0.129,
+      "price_eur_kwh": 0.119,
       "status": "live_fallback_source",
-      "source_url": "https://www.tarifadeluzhoy.com/comparador/companias-luz-baratas",
+      "source_url": "https://www.servalys.es/comercializadoras/ganaenergia/tarifas",
       "errors": [
         "https://ganaenergia.com/contratacion-luz?tid=6a103e94eeeae36be0aa992c: ValueError: No se encontró un precio 24h válido"
       ]
