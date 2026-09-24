@@ -1,0 +1,132 @@
+name: Weekly Electricity Story
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "stories/electricity_weekly.py"
+      - ".github/workflows/weekly-electricity-story.yml"
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publicar la Story en Instagram"
+        required: true
+        default: false
+        type: boolean
+      reference_date:
+        description: "Fecha de referencia YYYY-MM-DD (vacío = hoy)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weekly-electricity-story
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      BERME_REFERENCE_DATE: ${{ github.event.inputs.reference_date }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pillow requests
+
+      - name: Fetch OMIE and render Story
+        run: python stories/electricity_weekly.py
+
+      - name: Save generated preview
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/story-weekly-electricity.jpg docs/story-weekly-electricity.json
+          if git diff --cached --quiet; then
+            echo "Preview unchanged."
+          else
+            git commit -m "Update weekly electricity Story preview"
+            git push
+          fi
+
+      - name: Wait for public preview
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        run: |
+          URL="https://raw.githubusercontent.com/joselu392/berme-energy-automation/main/docs/story-weekly-electricity.jpg?run=${GITHUB_RUN_ID}"
+          for i in {1..30}; do
+            CODE=$(curl -L -s -o /dev/null -w "%{http_code}" "$URL")
+            if [ "$CODE" = "200" ]; then exit 0; fi
+            sleep 3
+          done
+          exit 1
+
+      - name: Create Story container
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        id: container
+        env:
+          META_IG_ACCESS_TOKEN: ${{ secrets.META_IG_ACCESS_TOKEN }}
+          META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
+        run: |
+          TOKEN="$(printf '%s' "$META_IG_ACCESS_TOKEN" | tr -d '\r\n')"
+          IG_ID="$(printf '%s' "$META_IG_USER_ID" | tr -d '\r\n ')"
+          IMAGE_URL="https://raw.githubusercontent.com/joselu392/berme-energy-automation/main/docs/story-weekly-electricity.jpg?run=${GITHUB_RUN_ID}"
+          RESPONSE=$(curl -sS -X POST "https://graph.instagram.com/$IG_ID/media" \
+            --data-urlencode "media_type=STORIES" \
+            --data-urlencode "image_url=$IMAGE_URL" \
+            --data-urlencode "access_token=$TOKEN")
+          echo "$RESPONSE" > /tmp/container.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open("/tmp/container.json"))
+          if "error" in d:
+              print(d["error"].get("message"))
+              raise SystemExit(1)
+          print("container_id="+d["id"])
+          PY
+          CID=$(python3 -c 'import json; print(json.load(open("/tmp/container.json"))["id"])')
+          echo "container_id=$CID" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for processing
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        env:
+          META_IG_ACCESS_TOKEN: ${{ secrets.META_IG_ACCESS_TOKEN }}
+          CONTAINER_ID: ${{ steps.container.outputs.container_id }}
+        run: |
+          TOKEN="$(printf '%s' "$META_IG_ACCESS_TOKEN" | tr -d '\r\n')"
+          for i in {1..30}; do
+            RESPONSE=$(curl -sS -G "https://graph.instagram.com/$CONTAINER_ID" \
+              --data-urlencode "fields=status_code" \
+              --data-urlencode "access_token=$TOKEN")
+            STATUS=$(python3 -c 'import json,sys; print(json.loads(sys.stdin.read()).get("status_code","ERROR"))' <<< "$RESPONSE")
+            [ "$STATUS" = "FINISHED" ] && exit 0
+            [ "$STATUS" = "ERROR" ] && exit 1
+            sleep 3
+          done
+          exit 1
+
+      - name: Publish Story
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        env:
+          META_IG_ACCESS_TOKEN: ${{ secrets.META_IG_ACCESS_TOKEN }}
+          META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
+          CONTAINER_ID: ${{ steps.container.outputs.container_id }}
+        run: |
+          TOKEN="$(printf '%s' "$META_IG_ACCESS_TOKEN" | tr -d '\r\n')"
+          IG_ID="$(printf '%s' "$META_IG_USER_ID" | tr -d '\r\n ')"
+          RESPONSE=$(curl -sS -X POST "https://graph.instagram.com/$IG_ID/media_publish" \
+            --data-urlencode "creation_id=$CONTAINER_ID" \
+            --data-urlencode "access_token=$TOKEN")
+          echo "$RESPONSE"
+          python3 - <<'PY' <<< "$RESPONSE"
+          import json,sys
+          d=json.loads(sys.stdin.read())
+          if "error" in d:
+              raise SystemExit(d["error"].get("message"))
+          print("STORY PUBLISHED", d.get("id"))
+          PY
