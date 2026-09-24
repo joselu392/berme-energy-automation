@@ -43,7 +43,7 @@ PROVIDERS = [
         "name": "Iberdrola",
         "tariff": "Plan Estable",
         "url": "https://www.iberdrola.es/luz/tarifas/plan-estable",
-        "fallback_url": "https://luzometro.com/companias-luz/iberdrola",
+        "fallback_url": "https://www.servalys.es/comercializadoras/iberdrola",
         "parser": "iberdrola",
         "seed": 0.148644,
     },
@@ -58,7 +58,7 @@ PROVIDERS = [
         "name": "Repsol",
         "tariff": "Tarifa Sin Horarios",
         "url": "https://www.repsol.es/particulares/hogar/luz-y-gas/tarifas/plan-mixto-rl2/",
-        "fallback_url": "https://selectra.es/energia/comparador/tarifa-luz",
+        "fallback_url": "https://www.servalys.es/comercializadoras/repsol",
         "parser": "repsol",
         "seed": 0.1200,
     },
@@ -165,9 +165,10 @@ def parse_price(provider, text):
 
     if p == "iberdrola":
         return first_regex(text, [
-            r"Plan Estable.{0,1000}?Las 24 horas del día\s*(0[,.]\d{4,6})\s*€/kWh",
-            r"15% de descuento durante 12 meses.{0,800}?Las 24 horas del día\s*(0[,.]\d{4,6})\s*€/kWh",
-            r"Precio de energía consumida.{0,700}?Las 24 horas del día\s*(0[,.]\d{4,6})\s*€/kWh",
+            r"Plan Estable.{0,1200}?Las 24 horas del día\s*(0[,.]\d{4,6})\s*€/kWh",
+            r"15% de descuento durante 12 meses.{0,1000}?Las 24 horas del día\s*(0[,.]\d{4,6})\s*€/kWh",
+            r"Plan Estable.{0,500}?0[,.]\d{4,6}.{0,80}?(0[,.]\d{4,6})",
+            r"Plan Estable.{0,500}?Con 20% dto\s*(0[,.]\d{4,6})",
         ])
 
     if p == "naturgy":
@@ -185,7 +186,8 @@ def parse_price(provider, text):
             if vals:
                 return validate_price(num(vals[-1]))
         return first_regex(text, [
-            r"Tarifa Sin Horarios.{0,350}?(0[,.]\d{4,6})\s*€/kWh",
+            r"Tarifa Sin Horarios.{0,700}?Precio Energ[ií]a\s*(0[,.]\d{3,6})\s*€/kWh",
+            r"Tarifa Sin Horarios.{0,350}?(0[,.]\d{3,6})\s*€/kWh",
             r"Sin Horarios.{0,1000}?CONSUMO.{0,250}?(0[,.]\d{4,6})\s*€/\s*kWh",
             r"-7\s*%.{0,1000}?24 horas\s*(0[,.]\d{4,6})\s*€/kWh",
             r"24 horas\s*(0[,.]\d{4,6})\s*€/kWh.{0,1200}?No incluye asistente",
@@ -193,8 +195,9 @@ def parse_price(provider, text):
 
     if p == "totalenergies":
         return first_regex(text, [
-            r"Precio luz\s*(0[,.]\d{4,6})\s*€/kWh",
-            r"A tu Aire Siempre Luz.{0,900}?(0[,.]\d{4,6})\s*€/kWh",
+            r"Precio (?:de )?luz\s*(0[,.]\d{4,6})\s*€/kWh",
+            r"Precio sin impuestos\s*(0[,.]\d{4,6})\s*€/kWh\s*24 horas",
+            r"A tu Aire Siempre Luz.{0,1400}?(0[,.]\d{4,6})\s*€/kWh",
         ])
 
     if p == "octopus":
@@ -212,13 +215,14 @@ def parse_price(provider, text):
                 r"Pepeenergy.{0,220}?Tarifa Estable de Luz.{0,180}?(0[,.]\d{4,6})",
             ])
         return first_regex(text, [
-            r"0[,.]1199\s*€/kWh",
+            r"(0[,.]1199)\s*€/kWh",
             r"Tarifa Estable de Luz.{0,650}?(0[,.]\d{4,6})\s*€/kWh",
         ])
 
     if p == "gana":
         return first_regex(text, [
-            r"Gana Energ[ií]a.{0,220}?Tarifa 24 horas.{0,180}?(0[,.]\d{4,6})",
+            r"Tarifa 24 horas.{0,700}?Precio Energ[ií]a\s*(0[,.]\d{4,6})\s*€/kWh",
+            r"Gana Energ[ií]a.{0,500}?Tarifa 24 horas.{0,400}?(0[,.]\d{4,6})",
             r"Tarifa 24 horas.{0,1000}?24h\s*:\s*(0[,.]\d{4,6})\s*€/kWh",
             r"Tarifa 24 horas.{0,900}?Energ[ií]a\s*(0[,.]\d{4,6})\s*€/kWh",
         ])
@@ -232,8 +236,8 @@ def parse_price(provider, text):
 
     if p == "plenitude":
         return first_regex(text, [
-            r"F[aá]cil Plus Luz Hogar.{0,900}?Sin impuestos\s*(?:0[,.]\d{4,6}\s*)?(0[,.]\d{4,6})",
-            r"Precio Final Energ[ií]a.{0,500}?Sin impuestos.{0,200}?(0[,.]\d{4,6})",
+            r"F[aá]cil Plus Luz Hogar.{0,700}?Sin impuestos\s*0[,.]\d{4,6}\s*(0[,.]\d{4,6})",
+            r"Precio Final Energ[ií]a.{0,500}?Sin impuestos.{0,200}?0[,.]\d{4,6}\s*(0[,.]\d{4,6})",
             r"F[aá]cil Plus Luz.{0,900}?(0[,.]\d{4,6})\s*€/kWh",
         ])
 
