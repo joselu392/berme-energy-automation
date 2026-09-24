@@ -41,16 +41,16 @@ PROVIDERS = [
     },
     {
         "name": "Iberdrola",
-        "tariff": "Plan Online",
-        "url": "https://www.iberdrola.es/luz/tarifas",
+        "tariff": "Plan Estable",
+        "url": "https://www.iberdrola.es/luz/tarifas/plan-estable",
         "fallback_url": "https://luzometro.com/companias-luz/iberdrola",
         "parser": "iberdrola",
-        "seed": 0.1249,
+        "seed": 0.148644,
     },
     {
         "name": "Naturgy",
         "tariff": "Tarifa Por Uso Luz",
-        "url": "https://www.naturgy.es/precios_tarifauso_luz",
+        "url": "https://www.naturgy.es/hogar/luz/tarifa_por_uso_luz",
         "parser": "naturgy",
         "seed": 0.112,
     },
@@ -60,12 +60,12 @@ PROVIDERS = [
         "url": "https://www.repsol.es/particulares/hogar/luz-y-gas/tarifas/plan-mixto-rl2/",
         "fallback_url": "https://selectra.es/energia/comparador/tarifa-luz",
         "parser": "repsol",
-        "seed": 0.119970,
+        "seed": 0.1200,
     },
     {
         "name": "TotalEnergies",
         "tariff": "A tu Aire Siempre Luz",
-        "url": "https://www.totalenergies.es/es/hogares",
+        "url": "https://www.totalenergies.es/es/hogares/tarifas-luz/a-tu-aire-siempre",
         "parser": "totalenergies",
         "seed": 0.0999,
     },
@@ -80,7 +80,7 @@ PROVIDERS = [
     {
         "name": "Pepeenergy",
         "tariff": "Tarifa Estable",
-        "url": "https://www.pepeenergy.com/",
+        "url": "https://www.pepeenergy.com/tarifas-luz/tarifa-estable-luz",
         "fallback_url": "https://www.tarifadeluzhoy.com/comparador/companias-luz-baratas",
         "parser": "pepeenergy",
         "seed": 0.1199,
@@ -96,17 +96,17 @@ PROVIDERS = [
     {
         "name": "Holaluz",
         "tariff": "Tarifa Clásica online",
-        "url": "https://www.holaluz.com/luz/tarifas-luz",
+        "url": "https://autoconsumo.holaluz.com/tarifas-luz",
         "fallback_url": "https://www.tarifadeluzhoy.com/comparador/holaluz-octopus-energy",
         "parser": "holaluz",
-        "seed": 0.165,
+        "seed": 0.178,
     },
     {
         "name": "Plenitude",
         "tariff": "Fácil Plus Luz",
-        "url": "https://eniplenitude.es/",
+        "url": "https://eniplenitude.es/hogar/tarifas-luz/facil/precios/",
         "parser": "plenitude",
-        "seed": 0.119990,
+        "seed": 0.107914,
     },
 ]
 
@@ -165,11 +165,9 @@ def parse_price(provider, text):
 
     if p == "iberdrola":
         return first_regex(text, [
-            r"Iberdrola Online.{0,350}?Energ[ií]a\s*(0[,.]\d{4,6})\s*€/kWh",
-            r"Precios sin impuestos de Iberdrola Online.{0,500}?Energ[ií]a P1\s*\|?\s*(0[,.]\d{4,6})\s*€/kWh",
-            r"Mismo precio de energ[ií]a las 24 horas:\s*(0[,.]\d{4,6})\s*€/kWh",
-            r"Precio de la energ[ií]a en punta.{0,120}?(0[,.]\d{4,6})\s*€/kWh",
-            r"Plan Online.{0,1000}?Las 24 horas del día\s*(0[,.]\d{4,6})\s*€/kWh",
+            r"Plan Estable.{0,1000}?Las 24 horas del día\s*(0[,.]\d{4,6})\s*€/kWh",
+            r"15% de descuento durante 12 meses.{0,800}?Las 24 horas del día\s*(0[,.]\d{4,6})\s*€/kWh",
+            r"Precio de energía consumida.{0,700}?Las 24 horas del día\s*(0[,.]\d{4,6})\s*€/kWh",
         ])
 
     if p == "naturgy":
@@ -227,15 +225,16 @@ def parse_price(provider, text):
 
     if p == "holaluz":
         return first_regex(text, [
-            r"Descuentos publicados.{0,250}?(0[,.]\d{3,6})\s*€/kWh",
-            r"Tarifa Cl[aá]sica.{0,900}?Si contratas online:\s*(0[,.]\d{3,6})\s*€/kWh",
-            r"Si contratas online:\s*(0[,.]\d{3,6})\s*€/kWh",
+            r"Tarifa Cl[aá]sica.{0,1200}?Contrataci[oó]n online:\s*(0[,.]\d{3,6})\s*€/kWh",
+            r"Contrataci[oó]n online:\s*(0[,.]\d{3,6})\s*€/kWh",
+            r"Precio 24 horas\s*(0[,.]\d{3,6})\s*€/kWh",
         ])
 
     if p == "plenitude":
         return first_regex(text, [
-            r"F[aá]cil Plus Luz.{0,800}?Consumo de energ[ií]a\s*(0[,.]\d{4,6})\s*€/kWh",
-            r"F[aá]cil Plus Luz.{0,700}?(0[,.]\d{4,6})\s*€/kWh",
+            r"F[aá]cil Plus Luz Hogar.{0,900}?Sin impuestos\s*(?:0[,.]\d{4,6}\s*)?(0[,.]\d{4,6})",
+            r"Precio Final Energ[ií]a.{0,500}?Sin impuestos.{0,200}?(0[,.]\d{4,6})",
+            r"F[aá]cil Plus Luz.{0,900}?(0[,.]\d{4,6})\s*€/kWh",
         ])
 
     raise ValueError(f"Parser desconocido: {p}")
