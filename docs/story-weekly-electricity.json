@@ -1,0 +1,49 @@
+{
+  "week_start": "2026-09-14",
+  "week_end": "2026-09-20",
+  "weekly_mean_mwh": 132.05809523809523,
+  "weekly_mean_kwh": 0.13205809523809522,
+  "min_daily_mwh": 104.63270833333333,
+  "max_daily_mwh": 177.43645833333335,
+  "historical_max_mwh": 544.98,
+  "historical_max_date": "8 mar 2022",
+  "pct_vs_historical": -75.76826759916048,
+  "daily": [
+    {
+      "date": "2026-09-14",
+      "mean_mwh": 177.43645833333335,
+      "periods": 96
+    },
+    {
+      "date": "2026-09-15",
+      "mean_mwh": 167.32614583333333,
+      "periods": 96
+    },
+    {
+      "date": "2026-09-16",
+      "mean_mwh": 104.63270833333333,
+      "periods": 96
+    },
+    {
+      "date": "2026-09-17",
+      "mean_mwh": 127.41458333333333,
+      "periods": 96
+    },
+    {
+      "date": "2026-09-18",
+      "mean_mwh": 124.77947916666666,
+      "periods": 96
+    },
+    {
+      "date": "2026-09-19",
+      "mean_mwh": 110.25552083333334,
+      "periods": 96
+    },
+    {
+      "date": "2026-09-20",
+      "mean_mwh": 112.56177083333334,
+      "periods": 96
+    }
+  ],
+  "source": "OMIE - precios del mercado diario en España"
+}
