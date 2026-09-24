@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import csv, io, json, os, re, xml.etree.ElementTree as ET
+import io, json, os
+import xlrd
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -10,7 +11,7 @@ ROOT=Path(__file__).resolve().parents[1]
 DOCS=ROOT/"docs"; DOCS.mkdir(exist_ok=True)
 OUT_IMG=DOCS/"story-weekly-brent.jpg"
 OUT_JSON=DOCS/"story-weekly-brent.json"
-FRED_BASE="https://fred.stlouisfed.org/data/DCOILBRENTEU.txt"
+EIA_XLS="https://www.eia.gov/dnav/pet/hist_xls/RBRTEd.xls"
 FX_BASE="https://api.frankfurter.app"
 HIST_MAX_EUR_BBL=122.22
 HIST_MAX_DATE="2022-03-08"
@@ -33,18 +34,33 @@ def get_with_retry(url, params=None, timeout=45, attempts=3):
     raise last
 
 def weekly_brent(start,end):
-    # FRED's table-data endpoint is lighter and more reliable than the chart CSV endpoint.
-    r=get_with_retry(FRED_BASE,timeout=30)
-    text=r.text
+    r=get_with_retry(EIA_XLS,timeout=45)
+    wb=xlrd.open_workbook(file_contents=r.content)
     rows={}
-    d=start
-    while d<=end:
-        key=d.isoformat()
-        # Works with both raw-text and HTML/table representations.
-        m=re.search(rf"{re.escape(key)}(?:\\s*\\||[^0-9.\\-]{{1,120}})([0-9]+(?:\\.[0-9]+)?)",text)
-        if m:
-            rows[d]=float(m.group(1))
-        d+=timedelta(days=1)
+    for sheet in wb.sheets():
+        for i in range(sheet.nrows):
+            vals=sheet.row_values(i)
+            if len(vals)<2:
+                continue
+            raw_date, raw_val=vals[0], vals[1]
+            dt=None
+            try:
+                if isinstance(raw_date,(int,float)) and raw_date>20000:
+                    dt=xlrd.xldate_as_datetime(raw_date, wb.datemode).date()
+                elif isinstance(raw_date,str):
+                    s=raw_date.strip()
+                    for fmt in ("%Y-%m-%d","%m/%d/%Y","%m/%d/%y"):
+                        try:
+                            dt=datetime.strptime(s,fmt).date()
+                            break
+                        except Exception:
+                            pass
+                if dt is None or not (start<=dt<=end):
+                    continue
+                val=float(raw_val)
+                rows[dt]=val
+            except Exception:
+                continue
     return rows
 
 def weekly_fx(start,end):
@@ -70,7 +86,7 @@ def build():
       "historical_max_eur_bbl":HIST_MAX_EUR_BBL,"historical_max_date":HIST_MAX_DATE,
       "pct_vs_historical":(avg/HIST_MAX_EUR_BBL-1)*100,
       "daily":[{"date":d.isoformat(),"eur_bbl":v} for d,v in weekly],
-      "source":"EIA/FRED Brent spot + EUR/USD de referencia"
+      "source":"EIA Brent Europe spot + EUR/USD de referencia"
     }
 
 def font(size,bold=False,italic=False):
@@ -118,7 +134,7 @@ def render(data):
     for i,(lab,val) in enumerate(metrics):
         x=[205,505,805][i]; d.text((x,1147),lab,font=font(22,i==2),fill=INK,anchor="ma"); d.text((x,1183),fnum(val,2),font=font(38,True),fill=INK,anchor="ma"); d.text((x,1221),"€/barril",font=font(19),fill=INK,anchor="ma")
     d.text((805,1240),hist_label,font=font(18),fill=MUTED,anchor="ma")
-    d.text((95,1305),"Fuente: EIA/FRED (Brent spot) + conversión EUR/USD.",font=font(21),fill=MUTED)
+    d.text((95,1305),"Fuente: EIA (Brent Europe spot) + conversión EUR/USD.",font=font(21),fill=MUTED)
     d.text((95,1338),"Precio de mercado; no equivale al precio final de carburantes.",font=font(21),fill=MUTED)
     d.rounded_rectangle((70,1400,1010,1515),radius=28,fill=(94,109,70))
     d.text((540,1430),"Si quieres revisar tu factura, escríbenos.",font=font(27,True),fill="white",anchor="ma"); d.text((540,1474),"Te ayudamos gratuitamente.",font=font(24),fill="white",anchor="ma")
