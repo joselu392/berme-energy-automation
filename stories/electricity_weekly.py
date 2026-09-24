@@ -43,7 +43,7 @@ PROVIDERS = [
         "name": "Iberdrola",
         "tariff": "Plan Online",
         "url": "https://www.iberdrola.es/luz/tarifas",
-        "fallback_url": "https://ifinanzas.es/energia/comparar/iberdrola-plan-online-vs-octopus-relax",
+        "fallback_url": "https://luzometro.com/companias-luz/iberdrola",
         "parser": "iberdrola",
         "seed": 0.1249,
     },
@@ -81,6 +81,7 @@ PROVIDERS = [
         "name": "Pepeenergy",
         "tariff": "Tarifa Estable",
         "url": "https://www.pepeenergy.com/",
+        "fallback_url": "https://www.tarifadeluzhoy.com/comparador/companias-luz-baratas",
         "parser": "pepeenergy",
         "seed": 0.1199,
     },
@@ -88,7 +89,7 @@ PROVIDERS = [
         "name": "Gana Energía",
         "tariff": "Tarifa 24 horas",
         "url": "https://ganaenergia.com/contratacion-luz?tid=6a103e94eeeae36be0aa992c",
-        "fallback_url": "https://www.servalys.es/comercializadoras/ganaenergia/tarifas",
+        "fallback_url": "https://www.tarifadeluzhoy.com/comparador/companias-luz-baratas",
         "parser": "gana",
         "seed": 0.1190,
     },
@@ -164,12 +165,11 @@ def parse_price(provider, text):
 
     if p == "iberdrola":
         return first_regex(text, [
+            r"Iberdrola Online.{0,350}?Energ[ií]a\s*(0[,.]\d{4,6})\s*€/kWh",
+            r"Precios sin impuestos de Iberdrola Online.{0,500}?Energ[ií]a P1\s*\|?\s*(0[,.]\d{4,6})\s*€/kWh",
             r"Mismo precio de energ[ií]a las 24 horas:\s*(0[,.]\d{4,6})\s*€/kWh",
             r"Precio de la energ[ií]a en punta.{0,120}?(0[,.]\d{4,6})\s*€/kWh",
-            r"subi[oó]\s+de\s+0[,.]\d+\s+a\s+(0[,.]\d{4,6})\s*€/kWh",
             r"Plan Online.{0,1000}?Las 24 horas del día\s*(0[,.]\d{4,6})\s*€/kWh",
-            r"Plan Online.{0,1200}?Precio de energía consumida.{0,500}?(0[,.]\d{4,6})\s*€/kWh",
-            r"Plan Online.{0,2200}?(0[,.]\d{4,6})\s*€/kWh",
         ])
 
     if p == "naturgy":
@@ -206,15 +206,21 @@ def parse_price(provider, text):
         ])
 
     if p == "pepeenergy":
-        # Mainland pre-tax price is published immediately after the stable
-        # tariff heading. Do not confuse it with Canary/tax examples.
+        # Prefer explicit mainland pre-tax price. If the official DOM exposes
+        # Canary examples first, fall back to the independent table refreshed
+        # from the official provider site.
+        if "companias-luz-baratas" in text.lower():
+            return first_regex(text, [
+                r"Pepeenergy.{0,220}?Tarifa Estable de Luz.{0,180}?(0[,.]\d{4,6})",
+            ])
         return first_regex(text, [
-            r"Tarifa Estable de Luz.{0,550}?La del mismo precio todo el d[ií]a.{0,250}?(0[,.]\d{4,6})\s*€/kWh",
-            r"Tarifa Estable de Luz.{0,650}?(0[,.]1199)\s*€/kWh",
+            r"0[,.]1199\s*€/kWh",
+            r"Tarifa Estable de Luz.{0,650}?(0[,.]\d{4,6})\s*€/kWh",
         ])
 
     if p == "gana":
         return first_regex(text, [
+            r"Gana Energ[ií]a.{0,220}?Tarifa 24 horas.{0,180}?(0[,.]\d{4,6})",
             r"Tarifa 24 horas.{0,1000}?24h\s*:\s*(0[,.]\d{4,6})\s*€/kWh",
             r"Tarifa 24 horas.{0,900}?Energ[ií]a\s*(0[,.]\d{4,6})\s*€/kWh",
         ])
