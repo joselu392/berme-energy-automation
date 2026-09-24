@@ -1,0 +1,52 @@
+name: Test Instagram API
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-instagram:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check required secrets
+        env:
+          META_IG_ACCESS_TOKEN: ${{ secrets.META_IG_ACCESS_TOKEN }}
+          META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
+        run: |
+          test -n "$META_IG_ACCESS_TOKEN" || (echo "Missing META_IG_ACCESS_TOKEN" && exit 1)
+          test -n "$META_IG_USER_ID" || (echo "Missing META_IG_USER_ID" && exit 1)
+
+      - name: Verify Instagram connection
+        env:
+          META_IG_ACCESS_TOKEN: ${{ secrets.META_IG_ACCESS_TOKEN }}
+          META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
+        run: |
+          HTTP_CODE=$(curl -sS -o /tmp/ig-response.json -w "%{http_code}" \
+            -H "Authorization: Bearer $META_IG_ACCESS_TOKEN" \
+            "https://graph.instagram.com/$META_IG_USER_ID?fields=user_id,username")
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("/tmp/ig-response.json")
+          try:
+              data = json.loads(p.read_text())
+          except Exception:
+              print("Instagram returned a non-JSON response.")
+              raise SystemExit(1)
+
+          if "error" in data:
+              err = data["error"]
+              print("Instagram API error:", err.get("message", "Unknown error"))
+              print("Error type:", err.get("type", "unknown"))
+              print("Error code:", err.get("code", "unknown"))
+              raise SystemExit(1)
+
+          print("Connection OK")
+          print("Instagram username:", data.get("username", "(not returned)"))
+          print("Instagram user object resolved successfully.")
+          PY
+
+          test "$HTTP_CODE" -ge 200 -a "$HTTP_CODE" -lt 300
