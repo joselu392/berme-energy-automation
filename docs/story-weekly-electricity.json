@@ -1,5 +1,7 @@
 {
   "date": "2026-09-28",
+  "week_start": "2026-09-21",
+  "week_end": "2026-09-27",
   "methodology": {
     "scope": "España peninsular, hogar 2.0TD, día laborable",
     "metric": "Media aritmética del término de energía sin impuestos",
@@ -12,104 +14,12 @@
     "flat": 0.1311077,
     "peak": 0.2038052
   },
-  "daily_average_eur_kwh": 0.1468768,
-  "hourly_average": [
-    {
-      "hour": 0,
-      "price_eur_kwh": 0.1057175
-    },
-    {
-      "hour": 1,
-      "price_eur_kwh": 0.1057175
-    },
-    {
-      "hour": 2,
-      "price_eur_kwh": 0.1057175
-    },
-    {
-      "hour": 3,
-      "price_eur_kwh": 0.1057175
-    },
-    {
-      "hour": 4,
-      "price_eur_kwh": 0.1057175
-    },
-    {
-      "hour": 5,
-      "price_eur_kwh": 0.1057175
-    },
-    {
-      "hour": 6,
-      "price_eur_kwh": 0.1057175
-    },
-    {
-      "hour": 7,
-      "price_eur_kwh": 0.1057175
-    },
-    {
-      "hour": 8,
-      "price_eur_kwh": 0.1311077
-    },
-    {
-      "hour": 9,
-      "price_eur_kwh": 0.1311077
-    },
-    {
-      "hour": 10,
-      "price_eur_kwh": 0.2038052
-    },
-    {
-      "hour": 11,
-      "price_eur_kwh": 0.2038052
-    },
-    {
-      "hour": 12,
-      "price_eur_kwh": 0.2038052
-    },
-    {
-      "hour": 13,
-      "price_eur_kwh": 0.2038052
-    },
-    {
-      "hour": 14,
-      "price_eur_kwh": 0.1311077
-    },
-    {
-      "hour": 15,
-      "price_eur_kwh": 0.1311077
-    },
-    {
-      "hour": 16,
-      "price_eur_kwh": 0.1311077
-    },
-    {
-      "hour": 17,
-      "price_eur_kwh": 0.1311077
-    },
-    {
-      "hour": 18,
-      "price_eur_kwh": 0.2038052
-    },
-    {
-      "hour": 19,
-      "price_eur_kwh": 0.2038052
-    },
-    {
-      "hour": 20,
-      "price_eur_kwh": 0.2038052
-    },
-    {
-      "hour": 21,
-      "price_eur_kwh": 0.2038052
-    },
-    {
-      "hour": 22,
-      "price_eur_kwh": 0.1311077
-    },
-    {
-      "hour": 23,
-      "price_eur_kwh": 0.1311077
-    }
+  "weekly_average_eur_kwh": 0.135117,
+  "historical_average_eur_kwh": 0.135117,
+  "change_vs_historical_pct": 0.0,
+  "historical_weeks": 1,
+  "weekly_history": [
+    0.135117
   ],
   "providers": [
     {
