@@ -3,7 +3,7 @@
 import json
 import os
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from statistics import mean
 from zoneinfo import ZoneInfo
@@ -109,9 +109,20 @@ def collect():
 
     averages = [mean(row["period_prices"][i] for row in rows) for i in range(3)]
     valley, flat, peak = averages
-    hourly = [valley] * 8 + [flat] * 2 + [peak] * 4 + [flat] * 4 + [peak] * 4 + [flat] * 2
+    weekday = [valley] * 8 + [flat] * 2 + [peak] * 4 + [flat] * 4 + [peak] * 4 + [flat] * 2
+    # Semana completa: cinco laborables con 2.0TD y sábado/domingo enteros en valle.
+    weekly_hours = weekday * 5 + [valley] * 48
+    week_end = today - timedelta(days=today.weekday() + 1)
+    week_start = week_end - timedelta(days=6)
+    previous_weekly = [item["weekly_average_eur_kwh"] for item in history
+                       if isinstance(item.get("weekly_average_eur_kwh"), (int, float))]
+    weekly_average = mean(weekly_hours)
+    historical_average = mean(previous_weekly) if previous_weekly else weekly_average
+    change_vs_historical = (weekly_average / historical_average - 1) * 100 if historical_average else 0
     snapshot = {
         "date": today.isoformat(),
+        "week_start": week_start.isoformat(),
+        "week_end": week_end.isoformat(),
         "methodology": {
             "scope": "España peninsular, hogar 2.0TD, día laborable",
             "metric": "Media aritmética del término de energía sin impuestos",
@@ -120,8 +131,11 @@ def collect():
             "excludes": "potencia, cuotas, mantenimiento, servicios e impuestos",
         },
         "period_average": {"valley": valley, "flat": flat, "peak": peak},
-        "daily_average_eur_kwh": mean(hourly),
-        "hourly_average": [{"hour": hour, "price_eur_kwh": value} for hour, value in enumerate(hourly)],
+        "weekly_average_eur_kwh": weekly_average,
+        "historical_average_eur_kwh": historical_average,
+        "change_vs_historical_pct": change_vs_historical,
+        "historical_weeks": len(previous_weekly) + 1,
+        "weekly_history": previous_weekly[-11:] + [weekly_average],
         "providers": rows,
     }
     history = [item for item in history if item.get("date") != today.isoformat()] + [snapshot]
@@ -149,42 +163,53 @@ def render(data):
     draw.multiline_text((950,235), f"ACTUALIZADO\n{current.day} {months[current.month-1]} {current.year}",
                         font=font(23), fill=ink, anchor="ra", align="right", spacing=6)
     draw.text((72,330), "Precio medio", font=font(62, True), fill=ink)
-    draw.text((72,405), "por horas", font=font(62, True), fill=green)
+    draw.text((72,405), "semanal", font=font(62, True), fill=green)
     draw.text((74,485), "10 comercializadoras · residencial · €/kWh", font=font(28), fill=ink)
 
     draw.rounded_rectangle((60,565,1020,1370), radius=34, fill=card)
-    daily = data["daily_average_eur_kwh"]
-    draw.text((100,605), "Media diaria", font=font(29), fill=ink)
-    draw.text((96,650), fmt(daily), font=font(103, True), fill=ink)
+    weekly = data["weekly_average_eur_kwh"]
+    draw.text((100,605), "Media de la semana", font=font(29), fill=ink)
+    draw.text((96,650), fmt(weekly), font=font(103, True), fill=ink)
     draw.text((438,716), "€/kWh", font=font(38), fill=ink)
 
-    av = data["period_average"]
-    labels = [("VALLE", av["valley"]), ("LLANO", av["flat"]), ("PUNTA", av["peak"])]
-    for index, (label, value) in enumerate(labels):
-        x0 = 100 + index * 300
-        draw.rounded_rectangle((x0,800,x0+275,920), radius=20, fill=light)
-        draw.text((x0+137,820), label, font=font(20, True), fill=muted, anchor="ma")
-        draw.text((x0+137,860), fmt(value), font=font(38, True), fill=ink, anchor="ma")
-        draw.text((x0+137,901), "€/kWh", font=font(17), fill=muted, anchor="ma")
+    pct = data["change_vs_historical_pct"]
+    draw.rounded_rectangle((645,635,975,785), radius=24, fill=(232,242,228))
+    draw.text((810,668), f'{"↓" if pct < 0 else "↑" if pct > 0 else "="} {pct:+.1f}%'.replace(".", ","),
+              font=font(42, True), fill=green, anchor="ma")
+    draw.text((810,727), "vs. media histórica", font=font(20), fill=ink, anchor="ma")
 
-    draw.text((100,965), "Media a lo largo del día", font=font(27, True), fill=ink)
-    x0, y0, x1, y1 = 110, 1030, 960, 1245
-    values = [item["price_eur_kwh"] for item in data["hourly_average"]]
+    historical = data["historical_average_eur_kwh"]
+    draw.rounded_rectangle((100,820,975,940), radius=22, fill=light)
+    draw.text((135,840), "Media histórica registrada", font=font(23, True), fill=ink)
+    draw.text((135,875), fmt(historical), font=font(40, True), fill=ink)
+    draw.text((335,891), "€/kWh", font=font(20), fill=muted)
+    weeks = data["historical_weeks"]
+    draw.text((930,882), f'{weeks} {"semana" if weeks == 1 else "semanas"}', font=font(21), fill=muted, anchor="ra")
+
+    draw.text((100,985), "Evolución semanal", font=font(27, True), fill=ink)
+    x0, y0, x1, y1 = 110, 1045, 960, 1245
+    values = data["weekly_history"]
     lo, hi = min(values) * .90, max(values) * 1.08
+    if hi == lo:
+        hi = lo + 0.01
     for i in range(4):
         y = y1 - i * (y1-y0) / 3
         draw.line((x0,y,x1,y), fill=(220,216,208), width=2)
     points=[]
-    for hour, value in enumerate(values):
-        x=x0+hour*(x1-x0)/23
+    count = max(1, len(values) - 1)
+    for index, value in enumerate(values):
+        x=x0+index*(x1-x0)/count
         y=y1-(value-lo)/(hi-lo)*(y1-y0)
         points.append((x,y))
-    draw.line(points, fill=green, width=7, joint="curve")
-    for hour in [0,4,8,12,16,20,23]:
-        x=x0+hour*(x1-x0)/23
-        draw.text((x,1270), f"{hour:02d}h", font=font(18), fill=muted, anchor="ma")
+    if len(points) == 1:
+        draw.ellipse((points[0][0]-7,points[0][1]-7,points[0][0]+7,points[0][1]+7), fill=green)
+    else:
+        draw.line(points, fill=green, width=7, joint="curve")
+    draw.text((110,1270), "Semanas anteriores", font=font(18), fill=muted)
+    draw.text((960,1270), "Semana actual", font=font(18), fill=muted, anchor="ra")
 
-    draw.text((100,1315), "Laborables · fines de semana y festivos: valle todo el día", font=font(18), fill=muted)
+    start=date.fromisoformat(data["week_start"]); end=date.fromisoformat(data["week_end"])
+    draw.text((100,1315), f"Semana del {start.day} {months[start.month-1]} al {end.day} {months[end.month-1]}", font=font(18), fill=muted)
     draw.text((90,1420), "Fuentes: tarifas públicas de las comercializadoras seleccionadas.", font=font(18), fill=muted)
     draw.text((90,1450), "Energía sin impuestos; excluye potencia, cuotas y servicios.", font=font(18), fill=muted)
     draw.rounded_rectangle((72,1510,1008,1620), radius=26, fill=olive)
@@ -195,7 +220,7 @@ def render(data):
 def main():
     data = collect()
     render(data)
-    print(json.dumps({"daily_average": round(data["daily_average_eur_kwh"], 4), "image": str(OUT_IMG)}, ensure_ascii=False))
+    print(json.dumps({"weekly_average": round(data["weekly_average_eur_kwh"], 4), "image": str(OUT_IMG)}, ensure_ascii=False))
 
 if __name__ == "__main__":
     main()
