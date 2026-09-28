@@ -262,8 +262,6 @@ def render(data):
     d = ImageDraw.Draw(img)
 
     # Fixed background/layout.
-    d.ellipse((775, -130, 1200, 300), fill=(238, 240, 232))
-    draw_nozzle(img)
 
     # Instagram top UI safe area: no important content above y=205.
     s = date.fromisoformat(data["week_start"])
@@ -300,8 +298,8 @@ def render(data):
         d.rounded_rectangle((445, y + 28, 655, y + 145), radius=22, fill=badge_fill)
         arrow = "↓" if pct <= 0 else "↑"
         pct_color = OLIVE if pct <= 0 else (145, 84, 35)
-        d.text((472, y + 43), f"{arrow} {pct:+.0f}%", font=font(37, bold=True), fill=pct_color)
-        d.text((472, y + 98), "vs. semana anterior", font=font(17), fill=MUTED)
+        d.text((550, y + 45), f"{arrow} {pct:+.0f}%", font=font(35, bold=True), fill=pct_color, anchor="ma")
+        d.text((550, y + 100), "vs. semana anterior", font=font(16), fill=MUTED, anchor="ma")
 
         d.rounded_rectangle((680, y + 24, 960, y + 145), radius=22, fill=LIGHT)
         sparkline(d, (705, y + 48, 930, y + 110), trend, color)
@@ -322,7 +320,7 @@ def render(data):
             d.line((105, y + 200, 965, y + 200), fill=(225, 221, 214), width=2)
 
     # Historical maxima.
-    d.rounded_rectangle((95, 1285, 985, 1415), radius=24, fill=LIGHT)
+    d.rounded_rectangle((95, 1285, 985, 1435), radius=24, fill=LIGHT)
     d.text((125, 1308), "Máximos históricos", font=font(25, bold=True), fill=INK)
     hist_rows = [
         ("Gasolina 95", data["gasoline_historical_max"], data["gasoline_historical_date"], GREEN),
@@ -331,7 +329,7 @@ def render(data):
     ]
     hy = [1350, 1382, 1414]
     # Slightly overlap lower edge intentionally? No: compress third row above 1410.
-    hy = [1344, 1374, 1404]
+    hy = [1348, 1385, 1420]
     for (label, value, dt, color), y in zip(hist_rows, hy):
         d.ellipse((125, y - 8, 145, y + 12), fill=color)
         d.text((160, y - 10), label, font=font(19), fill=INK)
