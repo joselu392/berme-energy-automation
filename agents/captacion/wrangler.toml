@@ -1,0 +1,20 @@
+name = "berme-energy-captacion"
+main = "src/index.ts"
+compatibility_date = "2026-09-28"
+
+[ai]
+binding = "AI"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = ["/api/*", "/health"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "berme-energy"
+database_id = "00000000-0000-0000-0000-000000000000" # Sustituir al crear D1
+migrations_dir = "migrations"
+
+[vars]
+APP_NAME = "Berme Energy"
