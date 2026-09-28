@@ -1,0 +1,19 @@
+const labels={new:"Nuevo",contacted:"Contactado",interested:"Interesado",waiting_bill:"Esperando factura",bill_received:"Factura recibida",proposal_sent:"Propuesta enviada",won:"Cliente",lost:"Descartado"};
+let leads=[]; let token=sessionStorage.getItem("berme_token")||"";
+const $=s=>document.querySelector(s); const auth=$("#authDialog"), leadDialog=$("#leadDialog"), msgDialog=$("#messageDialog");
+Object.entries(labels).forEach(([v,t])=>$("#statusFilter").insertAdjacentHTML("beforeend",`<option value="${v}">${t}</option>`));
+function toast(text){const el=$("#toast");el.textContent=text;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2200)}
+async function api(path,options={}){const r=await fetch(path,{...options,headers:{"content-type":"application/json","authorization":`Bearer ${token}`,...options.headers}});const data=await r.json();if(!r.ok)throw new Error(data.error||"No se pudo completar");return data}
+function safe(v){return String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]))}
+function render(){const q=$("#search").value.toLowerCase(),status=$("#statusFilter").value;const shown=leads.filter(l=>(!status||l.status===status)&&`${l.name} ${l.phone||""} ${l.email||""}`.toLowerCase().includes(q));
+  const due=leads.filter(l=>l.next_followup_at&&new Date(l.next_followup_at)<=new Date()).length;
+  $("#stats").innerHTML=[[leads.length,"Contactos"],[leads.filter(l=>l.status==="new").length,"Nuevos"],[leads.filter(l=>l.status==="waiting_bill").length,"Esperando factura"],[due,"Seguimientos pendientes"]].map(x=>`<div class="stat"><b>${x[0]}</b><span>${x[1]}</span></div>`).join("");
+  $("#board").innerHTML=shown.length?shown.map(l=>`<article class="lead"><div class="lead-head"><h3>${safe(l.name)}</h3><span class="tag">${labels[l.status]||l.status}</span></div><p class="meta">${safe(l.phone||l.email)}<br>${safe(l.source)} · ${safe(l.customer_type)}<br>${l.next_followup_at?`Próximo: ${new Date(l.next_followup_at).toLocaleString("es-ES")}`:"Sin seguimiento programado"}</p><div class="lead-actions"><button data-message="${l.id}">Preparar mensaje</button><button class="secondary" data-advance="${l.id}">Cambiar estado</button></div></article>`).join(""):`<p class="empty">No hay contactos con estos filtros.</p>`;
+}
+async function load(){try{leads=await api("/api/leads");render()}catch(e){if(String(e.message).includes("autorizado"))auth.showModal();else toast(e.message)}}
+$("#authForm").addEventListener("submit",e=>{e.preventDefault();token=$("#token").value;sessionStorage.setItem("berme_token",token);auth.close();load()});
+$("#newLead").onclick=()=>leadDialog.showModal(); $("#refresh").onclick=load; $("#search").oninput=render; $("#statusFilter").onchange=render;
+$("#leadForm").addEventListener("submit",async e=>{e.preventDefault();const f=new FormData(e.target),data=Object.fromEntries(f.entries());data.consent=f.has("consent");try{await api("/api/leads",{method:"POST",body:JSON.stringify(data)});leadDialog.close();e.target.reset();toast("Contacto guardado");load()}catch(err){toast(err.message)}});
+$("#board").addEventListener("click",async e=>{const id=e.target.dataset.message||e.target.dataset.advance;if(!id)return;try{if(e.target.dataset.message){e.target.textContent="Preparando…";const x=await api(`/api/leads/${id}/suggest-message`,{method:"POST",body:"{}"});$("#suggested").value=x.message;msgDialog.showModal()}else{const lead=leads.find(x=>x.id==id),keys=Object.keys(labels),next=keys[(keys.indexOf(lead.status)+1)%keys.length];await api(`/api/leads/${id}`,{method:"PATCH",body:JSON.stringify({status:next})});load()}}catch(err){toast(err.message)}});
+$("#copyMessage").onclick=async()=>{await navigator.clipboard.writeText($("#suggested").value);toast("Mensaje copiado")};
+if(token)load();else auth.showModal();
