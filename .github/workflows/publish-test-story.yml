@@ -27,27 +27,27 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Pillow
-        run: pip install pillow
+      - name: Install dependencies
+        run: pip install pillow requests xlrd openpyxl beautifulsoup4
 
-      - name: Render today's Story
-        run: python stories/render_test_story.py
+      - name: Render the fixed electricity template
+        run: python stories/electricity_hourly.py
 
       - name: Publish image to repository
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/story-test-luz.jpg
+          git add docs/story-weekly-electricity.jpg docs/story-weekly-electricity.json
           if git diff --cached --quiet; then
             echo "Story image already up to date."
           else
-            git commit -m "Render test electricity Story"
+            git commit -m "Render fixed electricity Story for test"
             git push
           fi
 
       - name: Wait for public image
         run: |
-          URL="https://raw.githubusercontent.com/joselu392/berme-energy-automation/main/docs/story-test-luz.jpg?run=${GITHUB_RUN_ID}"
+          URL="https://raw.githubusercontent.com/joselu392/berme-energy-automation/main/docs/story-weekly-electricity.jpg?run=${GITHUB_RUN_ID}"
           for i in {1..20}; do
             CODE=$(curl -L -s -o /dev/null -w "%{http_code}" "$URL")
             if [ "$CODE" = "200" ]; then
@@ -68,7 +68,7 @@ jobs:
         run: |
           TOKEN="$(printf '%s' "$META_IG_ACCESS_TOKEN" | tr -d '\r\n')"
           IG_ID="$(printf '%s' "$META_IG_USER_ID" | tr -d '\r\n ')"
-          IMAGE_URL="https://raw.githubusercontent.com/joselu392/berme-energy-automation/main/docs/story-test-luz.jpg?run=${GITHUB_RUN_ID}"
+          IMAGE_URL="https://raw.githubusercontent.com/joselu392/berme-energy-automation/main/docs/story-weekly-electricity.jpg?run=${GITHUB_RUN_ID}"
 
           RESPONSE=$(curl -sS -X POST "https://graph.instagram.com/$IG_ID/media" \
             --data-urlencode "media_type=STORIES" \

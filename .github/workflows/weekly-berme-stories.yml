@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - "stories/electricity_weekly.py"
+      - "stories/electricity_hourly.py"
       - "stories/gas_weekly.py"
       - "stories/fuels_weekly.py"
       - "stories/brent_weekly.py"
@@ -48,7 +49,7 @@ jobs:
         run: pip install pillow requests xlrd openpyxl beautifulsoup4 beautifulsoup4
 
       - name: Generate fixed electricity template
-        run: python stories/electricity_weekly.py
+        run: python stories/electricity_hourly.py
 
       - name: Generate fixed gas template
         run: python stories/gas_weekly.py
