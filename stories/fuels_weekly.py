@@ -44,6 +44,8 @@ def font(size, bold=False, italic=False):
         p = base + "-Oblique.ttf"
     else:
         p = base + ".ttf"
+    if not Path(p).exists():
+        p = "/usr/share/fonts/truetype/dejavu/DejaVuSans" + ("-Bold.ttf" if bold else ".ttf")
     return ImageFont.truetype(p, size)
 
 def fnum(x, n=3):
@@ -268,7 +270,7 @@ def render(data):
     e = date.fromisoformat(data["week_end"])
     months = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"]
     d.multiline_text(
-        (920, 215),
+        (920, 235),
         f"SEMANA DEL\n{s.day} AL {e.day} {months[e.month-1]} {e.year}",
         font=font(23), fill=INK, anchor="ra", align="right", spacing=6
     )
@@ -343,15 +345,11 @@ def render(data):
     d.text((140, 1504), "El Brent es crudo: se muestra su equivalente €/L, no un precio de gasolinera.", font=font(18), fill=MUTED)
 
     # CTA and signature, both above the Instagram reply bar.
-    d.rounded_rectangle((75, 1565, 1005, 1675), radius=26, fill=(94, 109, 70))
-    d.text((540, 1593), "Si quieres revisar tu factura, escríbenos.", font=font(26, bold=True), fill="white", anchor="ma")
-    d.text((540, 1633), "Te ayudamos gratuitamente.", font=font(23), fill="white", anchor="ma")
+    d.rounded_rectangle((75, 1535, 1005, 1620), radius=24, fill=(94, 109, 70))
+    d.text((540, 1553), "Si quieres revisar tu factura, escríbenos.", font=font(25, bold=True), fill="white", anchor="ma")
+    d.text((540, 1590), "Te ayudamos gratuitamente.", font=font(22), fill="white", anchor="ma")
 
-    d.line((80, 1725, 155, 1725), fill=GREEN, width=4)
-    d.text((80, 1743), "Ahorra con", font=font(29), fill=INK)
-    d.text((80, 1780), "Berme Energy.", font=font(31, italic=True), fill=GREEN)
-
-    # Bottom ~95 px plus Instagram UI overlay space remains visually empty.
+    # The final 300 px stay empty for Instagram's reply and action controls.
     img.save(OUT_IMG, "JPEG", quality=94, optimize=True, progressive=True)
 
 def main():
