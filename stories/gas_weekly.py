@@ -67,6 +67,8 @@ def build():
 def font(size,bold=False,italic=False):
     p="/usr/share/fonts/truetype/dejavu/DejaVuSans"
     p+=("-BoldOblique.ttf" if bold and italic else "-Bold.ttf" if bold else "-Oblique.ttf" if italic else ".ttf")
+    if not Path(p).exists():
+        p="/usr/share/fonts/truetype/dejavu/DejaVuSans"+("-Bold.ttf" if bold else ".ttf")
     return ImageFont.truetype(p,size)
 
 def draw_burner(img):
@@ -90,7 +92,7 @@ def render(data):
     draw_burner(img)
     s=date.fromisoformat(data["week_start"]); e=date.fromisoformat(data["week_end"])
     months=["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"]
-    d.multiline_text((930,210),f"SEMANA DEL\n{s.day} AL {e.day} {months[e.month-1]} {e.year}",
+    d.multiline_text((930,235),f"SEMANA DEL\n{s.day} AL {e.day} {months[e.month-1]} {e.year}",
                      font=font(24),fill=INK,anchor="ra",align="right",spacing=7)
     d.text((75,315),"Precio medio",font=font(65,True),fill=INK)
     d.text((75,392),"del",font=font(65,True),fill=INK)
@@ -129,12 +131,13 @@ def render(data):
     d.text((805,1240),data["historical_max_date"],font=font(18),fill=MUTED,anchor="ma")
     d.text((95,1305),"Fuente: MIBGAS PVB. Precio diario del mercado mayorista.",font=font(21),fill=MUTED)
     d.text((95,1338),"No equivale al precio final de tu factura.",font=font(21),fill=MUTED)
-    d.rounded_rectangle((70,1400,1010,1515),radius=28,fill=(94,109,70))
-    d.text((540,1430),"Si quieres revisar tu factura, escríbenos.",font=font(27,True),fill="white",anchor="ma")
-    d.text((540,1474),"Te ayudamos gratuitamente.",font=font(24),fill="white",anchor="ma")
-    d.line((80,1555,150,1555),fill=GREEN,width=4)
-    d.text((80,1572),"Ahorra con",font=font(28),fill=INK)
-    d.text((80,1607),"Berme Energy.",font=font(30,italic=True),fill=GREEN)
+    d.line((95,1380,165,1380),fill=GREEN,width=4)
+    d.text((95,1393),"Ahorra con",font=font(25),fill=INK)
+    d.text((250,1393),"Berme Energy.",font=font(27,italic=True),fill=GREEN)
+    d.rounded_rectangle((70,1450,1010,1570),radius=28,fill=(94,109,70))
+    d.text((540,1480),"Si quieres revisar tu factura, escríbenos.",font=font(27,True),fill="white",anchor="ma")
+    d.text((540,1525),"Te ayudamos gratuitamente.",font=font(24),fill="white",anchor="ma")
+    # The final 350 px stay empty for Instagram's reply and action controls.
     img.save(OUT_IMG,"JPEG",quality=93,optimize=True,progressive=True)
 
 def main():
