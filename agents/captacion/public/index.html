@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Berme Energy · Captación</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <div><span class="mark">B</span><strong>Berme Energy</strong></div>
+    <span class="agent">Agente de captación</span>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div><p class="eyebrow">PANEL COMERCIAL</p><h1>Contactos y seguimientos</h1><p>Organiza oportunidades, prepara mensajes y no pierdas ninguna factura.</p></div>
+      <button id="newLead">+ Nuevo contacto</button>
+    </section>
+
+    <section class="stats" id="stats"></section>
+    <section class="toolbar">
+      <input id="search" type="search" placeholder="Buscar nombre, teléfono o email">
+      <select id="statusFilter"><option value="">Todos los estados</option></select>
+      <button class="secondary" id="refresh">Actualizar</button>
+    </section>
+    <section class="board" id="board"><p class="empty">Introduce tu clave para cargar los contactos.</p></section>
+  </main>
+
+  <dialog id="authDialog">
+    <form method="dialog" id="authForm"><h2>Acceso privado</h2><p>Introduce la clave interna del panel.</p><input id="token" type="password" required autocomplete="current-password"><button>Entrar</button></form>
+  </dialog>
+
+  <dialog id="leadDialog">
+    <form method="dialog" id="leadForm">
+      <div class="dialog-title"><h2>Nuevo contacto</h2><button class="icon" value="cancel" formnovalidate>×</button></div>
+      <label>Nombre<input name="name" required></label>
+      <div class="grid"><label>Teléfono<input name="phone"></label><label>Email<input name="email" type="email"></label></div>
+      <div class="grid"><label>Origen<select name="source"><option value="instagram">Instagram</option><option value="whatsapp">WhatsApp</option><option value="web">Web</option><option value="referral">Recomendación</option><option value="manual">Manual</option></select></label><label>Cliente<select name="customer_type"><option value="unknown">Por definir</option><option value="home">Hogar</option><option value="business">Negocio</option><option value="community">Comunidad</option></select></label></div>
+      <label>Suministro<select name="supply_type"><option value="unknown">Por definir</option><option value="electricity">Luz</option><option value="gas">Gas</option><option value="both">Luz y gas</option></select></label>
+      <label>Notas<textarea name="notes" rows="3"></textarea></label>
+      <label class="check"><input name="consent" type="checkbox"> Ha autorizado el registro y contacto</label>
+      <button type="submit">Guardar contacto</button>
+    </form>
+  </dialog>
+
+  <dialog id="messageDialog"><div class="dialog-title"><h2>Mensaje sugerido</h2><button class="icon" onclick="this.closest('dialog').close()">×</button></div><textarea id="suggested" rows="8"></textarea><button id="copyMessage">Copiar mensaje</button></dialog>
+  <div id="toast"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
