@@ -15,10 +15,15 @@
     "peak": 0.2038052
   },
   "weekly_average_eur_kwh": 0.135117,
+  "business_weekly_average_eur_kwh": 0.14371853968253967,
+  "business_historical_average_eur_kwh": 0.14371853968253967,
+  "business_change_vs_historical_pct": 0.0,
+  "business_sample": 3,
   "historical_average_eur_kwh": 0.135117,
   "change_vs_historical_pct": 0.0,
-  "historical_weeks": 1,
+  "historical_weeks": 2,
   "weekly_history": [
+    0.135117,
     0.135117
   ],
   "providers": [
@@ -31,7 +36,7 @@
         0.11781,
         0.18621
       ],
-      "status": "verified_reference"
+      "status": "cached"
     },
     {
       "name": "Iberdrola",
@@ -42,7 +47,7 @@
         0.136,
         0.194
       ],
-      "status": "verified_reference"
+      "status": "cached"
     },
     {
       "name": "Naturgy",
@@ -53,7 +58,7 @@
         0.1052,
         0.1737
       ],
-      "status": "verified_reference"
+      "status": "cached"
     },
     {
       "name": "Repsol",
@@ -64,7 +69,7 @@
         0.1159,
         0.1999
       ],
-      "status": "verified_reference"
+      "status": "cached"
     },
     {
       "name": "TotalEnergies",
@@ -75,7 +80,7 @@
         0.092051,
         0.160301
       ],
-      "status": "verified_reference"
+      "status": "cached"
     },
     {
       "name": "Octopus",
@@ -86,7 +91,7 @@
         0.098,
         0.184
       ],
-      "status": "verified_reference"
+      "status": "cached"
     },
     {
       "name": "Gana Energía",
@@ -97,7 +102,7 @@
         0.104,
         0.171
       ],
-      "status": "verified_reference"
+      "status": "cached"
     },
     {
       "name": "Holaluz",
@@ -108,7 +113,7 @@
         0.163,
         0.242
       ],
-      "status": "verified_reference"
+      "status": "cached"
     },
     {
       "name": "Plenitude",
@@ -119,7 +124,7 @@
         0.174,
         0.248
       ],
-      "status": "verified_reference"
+      "status": "cached"
     },
     {
       "name": "Pepeenergy",
@@ -130,7 +135,7 @@
         0.205116,
         0.278941
       ],
-      "status": "verified_reference"
+      "status": "cached"
     }
   ]
 }
