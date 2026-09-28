@@ -247,14 +247,30 @@ def sparkline(draw, box, series, color):
         x = x0 + (x1 - x0) * (i / max(1, n - 1))
         y = y1 - (v - lo) / (hi - lo) * (y1 - y0)
         pts.append((x, y))
-    draw.line(pts, fill=color, width=5, joint="curve")
-    for x, y in pts:
-        draw.ellipse((x - 3, y - 3, x + 3, y + 3), fill=color)
+    # Soft area, reference lines and stronger endpoints make the trend readable
+    # at Story size without turning the card into a dense analytical chart.
+    pale = tuple(round(channel * 0.18 + 255 * 0.82) for channel in color)
+    draw.line((x0, y0, x1, y0), fill=(222, 219, 212), width=1)
+    draw.line((x0, y1, x1, y1), fill=(222, 219, 212), width=1)
+    draw.polygon([pts[0], *pts, (pts[-1][0], y1), (pts[0][0], y1)], fill=pale)
+    draw.line(pts, fill=color, width=6, joint="curve")
+    for index, (x, y) in enumerate(pts):
+        radius = 6 if index in (0, len(pts)-1) else 3
+        draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=color)
+
+    if series:
+        draw.text((x0, y1 + 8), short_date(series[0]["date"]), font=font(14), fill=MUTED)
+        draw.text((x1, y1 + 8), short_date(series[-1]["date"]), font=font(14), fill=MUTED, anchor="ra")
 
 def date_label(iso):
     d = date.fromisoformat(iso)
     months = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"]
     return f"{d.day} {months[d.month-1]} {d.year}"
+
+def short_date(iso):
+    d = date.fromisoformat(iso)
+    months = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"]
+    return f"{d.day} {months[d.month-1]}"
 
 def render(data):
     W, H = 1080, 1920
@@ -301,8 +317,8 @@ def render(data):
         d.text((550, y + 45), f"{arrow} {pct:+.0f}%", font=font(35, bold=True), fill=pct_color, anchor="ma")
         d.text((550, y + 100), "vs. semana anterior", font=font(16), fill=MUTED, anchor="ma")
 
-        d.rounded_rectangle((680, y + 24, 960, y + 145), radius=22, fill=LIGHT)
-        sparkline(d, (705, y + 48, 930, y + 110), trend, color)
+        d.rounded_rectangle((680, y + 20, 960, y + 155), radius=22, fill=LIGHT)
+        sparkline(d, (702, y + 40, 938, y + 105), trend, color)
 
         if idx < 2:
             # National weekly bulletin has one weekly observation; show current week range as the last
@@ -311,9 +327,9 @@ def render(data):
         else:
             vals = [x["value"] for x in trend] or [value]
         d.text(
-            (700, y + 155),
+            (820, y + 170),
             f"Mín. {fnum(min(vals),3)}  |  Máx. {fnum(max(vals),3)}",
-            font=font(18), fill=MUTED
+            font=font(17), fill=MUTED, anchor="ma"
         )
 
         if idx < 2:
