@@ -11,7 +11,8 @@ on:
       - "stories/brent_weekly.py"
       - ".github/workflows/weekly-berme-stories.yml"
   schedule:
-    - cron: "0 8 * * 1"
+    - cron: "0 15 * * 2"
+      timezone: "Europe/Madrid"
   workflow_dispatch:
     inputs:
       publish:
