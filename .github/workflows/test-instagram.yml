@@ -2,6 +2,10 @@ name: Test Instagram API
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/test-instagram.yml"
 
 permissions:
   contents: read
