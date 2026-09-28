@@ -31,7 +31,7 @@ jobs:
         run: pip install pillow requests xlrd openpyxl beautifulsoup4
 
       - name: Render the fixed electricity template
-        run: python stories/electricity_weekly.py
+        run: python stories/electricity_hourly.py
 
       - name: Publish image to repository
         run: |
