@@ -62,6 +62,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add             docs/story-weekly-electricity.jpg docs/story-weekly-electricity.json             docs/story-weekly-gas.jpg docs/story-weekly-gas.json             docs/story-weekly-fuels.jpg docs/story-weekly-fuels.json
+          git add docs/retail-electricity-hourly-history.json
           if git diff --cached --quiet; then
             echo "Previews unchanged."
           else
