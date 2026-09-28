@@ -36,6 +36,14 @@ PROVIDERS = [
     ("Pepeenergy", "Variable", "https://www.pepeenergy.com/tarifas-luz/tarifa-variable-luz", (0.143113, 0.205116, 0.278941)),
 ]
 
+# Primera muestra empresarial verificable (pequeños negocios 2.0TD, <=15 kW).
+# Endesa e Iberdrola publican precio 24 h; Naturgy publica tres periodos.
+BUSINESS_PROVIDERS = [
+    ("Endesa", (0.124777, 0.124777, 0.124777)),
+    ("Iberdrola", (0.143331, 0.143331, 0.143331)),
+    ("Naturgy", (0.129000, 0.164000, 0.237000)),
+]
+
 HEADERS = {"User-Agent": "Mozilla/5.0", "Accept-Language": "es-ES,es;q=0.9"}
 
 def reference_date():
@@ -117,6 +125,13 @@ def collect():
     previous_weekly = [item["weekly_average_eur_kwh"] for item in history
                        if isinstance(item.get("weekly_average_eur_kwh"), (int, float))]
     weekly_average = mean(weekly_hours)
+    business_weekly = []
+    for _, (business_valley, business_flat, business_peak) in BUSINESS_PROVIDERS:
+        business_weekly.append((88 * business_valley + 40 * business_flat + 40 * business_peak) / 168)
+    business_average = mean(business_weekly)
+    previous_business = [item["business_weekly_average_eur_kwh"] for item in history
+                         if isinstance(item.get("business_weekly_average_eur_kwh"), (int, float))]
+    business_historical = mean(previous_business) if previous_business else business_average
     historical_average = mean(previous_weekly) if previous_weekly else weekly_average
     change_vs_historical = (weekly_average / historical_average - 1) * 100 if historical_average else 0
     snapshot = {
@@ -132,6 +147,10 @@ def collect():
         },
         "period_average": {"valley": valley, "flat": flat, "peak": peak},
         "weekly_average_eur_kwh": weekly_average,
+        "business_weekly_average_eur_kwh": business_average,
+        "business_historical_average_eur_kwh": business_historical,
+        "business_change_vs_historical_pct": (business_average / business_historical - 1) * 100,
+        "business_sample": len(BUSINESS_PROVIDERS),
         "historical_average_eur_kwh": historical_average,
         "change_vs_historical_pct": change_vs_historical,
         "historical_weeks": len(previous_weekly) + 1,
@@ -156,60 +175,60 @@ def render(data):
     green, olive, card, light = (42,111,57), (90,102,74), (253,251,247), (239,237,231)
     image = Image.new("RGB", (width, height), bg)
     draw = ImageDraw.Draw(image)
-    current = date.fromisoformat(data["date"])
     months = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"]
 
     # 220 px superiores y 300 px inferiores reservados para Instagram.
-    draw.multiline_text((950,235), f"ACTUALIZADO\n{current.day} {months[current.month-1]} {current.year}",
-                        font=font(23), fill=ink, anchor="ra", align="right", spacing=6)
     draw.text((72,330), "Precio medio", font=font(62, True), fill=ink)
     draw.text((72,405), "semanal", font=font(62, True), fill=green)
-    draw.text((74,485), "10 comercializadoras · residencial · €/kWh", font=font(28), fill=ink)
+    draw.text((74,485), "Hogares y pequeños negocios 2.0TD · €/kWh", font=font(28), fill=ink)
 
     draw.rounded_rectangle((60,565,1020,1370), radius=34, fill=card)
     weekly = data["weekly_average_eur_kwh"]
-    draw.text((100,605), "Media de la semana", font=font(29), fill=ink)
-    draw.text((96,650), fmt(weekly), font=font(103, True), fill=ink)
-    draw.text((438,716), "€/kWh", font=font(38), fill=ink)
+    business = data["business_weekly_average_eur_kwh"]
+    columns = [("HOGARES", weekly, "10 tarifas", data["change_vs_historical_pct"]),
+               ("NEGOCIOS", business, f'{data["business_sample"]} tarifas', data["business_change_vs_historical_pct"])]
+    has_comparison = data["historical_weeks"] > 1
+    for index, (label, value, sample, pct) in enumerate(columns):
+        x = 100 + index * 455
+        draw.text((x,610), label, font=font(22, True), fill=muted)
+        draw.text((x,660), fmt(value), font=font(72, True), fill=ink)
+        draw.text((x+300,710), "€/kWh", font=font(25), fill=ink)
+        draw.text((x,760), sample, font=font(18), fill=muted)
+        if has_comparison:
+            draw.text((x+300,760), f'{pct:+.1f}% vs. histórico'.replace(".", ","), font=font(18, True), fill=green, anchor="ra")
 
-    pct = data["change_vs_historical_pct"]
-    draw.rounded_rectangle((645,635,975,785), radius=24, fill=(232,242,228))
-    draw.text((810,668), f'{"↓" if pct < 0 else "↑" if pct > 0 else "="} {pct:+.1f}%'.replace(".", ","),
-              font=font(42, True), fill=green, anchor="ma")
-    draw.text((810,727), "vs. media histórica", font=font(20), fill=ink, anchor="ma")
-
-    historical = data["historical_average_eur_kwh"]
-    draw.rounded_rectangle((100,820,975,940), radius=22, fill=light)
-    draw.text((135,840), "Media histórica registrada", font=font(23, True), fill=ink)
-    draw.text((135,875), fmt(historical), font=font(40, True), fill=ink)
-    draw.text((335,891), "€/kWh", font=font(20), fill=muted)
     weeks = data["historical_weeks"]
-    draw.text((930,882), f'{weeks} {"semana" if weeks == 1 else "semanas"}', font=font(21), fill=muted, anchor="ra")
-
-    draw.text((100,985), "Evolución semanal", font=font(27, True), fill=ink)
-    x0, y0, x1, y1 = 110, 1045, 960, 1245
-    values = data["weekly_history"]
-    lo, hi = min(values) * .90, max(values) * 1.08
-    if hi == lo:
-        hi = lo + 0.01
-    for i in range(4):
-        y = y1 - i * (y1-y0) / 3
-        draw.line((x0,y,x1,y), fill=(220,216,208), width=2)
-    points=[]
-    count = max(1, len(values) - 1)
-    for index, value in enumerate(values):
-        x=x0+index*(x1-x0)/count
-        y=y1-(value-lo)/(hi-lo)*(y1-y0)
-        points.append((x,y))
-    if len(points) == 1:
-        draw.ellipse((points[0][0]-7,points[0][1]-7,points[0][0]+7,points[0][1]+7), fill=green)
-    else:
+    if has_comparison:
+        historical = data["historical_average_eur_kwh"]
+        draw.rounded_rectangle((100,820,975,940), radius=22, fill=light)
+        draw.text((135,840), "Media histórica registrada", font=font(23, True), fill=ink)
+        draw.text((135,875), f'Hogares {fmt(historical)}', font=font(29, True), fill=ink)
+        draw.text((500,875), f'Negocios {fmt(data["business_historical_average_eur_kwh"])}', font=font(29, True), fill=ink)
+        draw.text((930,882), f'{weeks} semanas', font=font(21), fill=muted, anchor="ra")
+        draw.text((100,985), "Evolución semanal", font=font(27, True), fill=ink)
+        x0, y0, x1, y1 = 110, 1045, 960, 1245
+        values = data["weekly_history"]
+        lo, hi = min(values) * .90, max(values) * 1.08
+        if hi == lo:
+            hi = lo + 0.01
+        for i in range(4):
+            y = y1 - i * (y1-y0) / 3
+            draw.line((x0,y,x1,y), fill=(220,216,208), width=2)
+        points=[]
+        count = max(1, len(values) - 1)
+        for index, value in enumerate(values):
+            x=x0+index*(x1-x0)/count
+            y=y1-(value-lo)/(hi-lo)*(y1-y0)
+            points.append((x,y))
         draw.line(points, fill=green, width=7, joint="curve")
-    draw.text((110,1270), "Semanas anteriores", font=font(18), fill=muted)
-    draw.text((960,1270), "Semana actual", font=font(18), fill=muted, anchor="ra")
+        draw.text((110,1270), "Semanas anteriores", font=font(18), fill=muted)
+        draw.text((960,1270), "Semana actual", font=font(18), fill=muted, anchor="ra")
+    else:
+        pass
 
     start=date.fromisoformat(data["week_start"]); end=date.fromisoformat(data["week_end"])
-    draw.text((100,1315), f"Semana del {start.day} {months[start.month-1]} al {end.day} {months[end.month-1]}", font=font(18), fill=muted)
+    period_y = 875 if not has_comparison else 1315
+    draw.text((100,period_y), f"Semana del {start.day} {months[start.month-1]} al {end.day} {months[end.month-1]}", font=font(21, True), fill=ink)
     draw.text((90,1420), "Fuentes: tarifas públicas de las comercializadoras seleccionadas.", font=font(18), fill=muted)
     draw.text((90,1450), "Energía sin impuestos; excluye potencia, cuotas y servicios.", font=font(18), fill=muted)
     draw.rounded_rectangle((72,1510,1008,1620), radius=26, fill=olive)
