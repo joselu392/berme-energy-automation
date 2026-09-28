@@ -378,6 +378,8 @@ def font(size, bold=False, italic=False):
         path = base + "-Oblique.ttf"
     else:
         path = base + ".ttf"
+    if not Path(path).exists():
+        path = base + ("-Bold.ttf" if bold else ".ttf")
     return ImageFont.truetype(path, size)
 
 def fmt(v, decimals=3):
@@ -416,9 +418,9 @@ def render(data):
     current = date.fromisoformat(data["date"])
     months = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"]
 
-    # TOP SAFE AREA: no essential content above 205px.
+    # Instagram reserves the first 220 px for the account name and progress UI.
     d.multiline_text(
-        (705, 210),
+        (705, 235),
         f"ACTUALIZADO\n{current.day} {months[current.month-1]} {current.year}",
         font=font(23), fill=INK, anchor="ra", align="right", spacing=7
     )
