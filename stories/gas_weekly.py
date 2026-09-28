@@ -88,11 +88,9 @@ def render(data):
     W,H=1080,1920; BG=(247,244,237); INK=(15,15,15); MUTED=(83,82,79)
     GREEN=(10,126,46); CARD=(253,251,247); LIGHT=(244,242,236)
     img=Image.new("RGB",(W,H),BG); d=ImageDraw.Draw(img)
-    d.ellipse((760,-140,1190,290),fill=(235,240,226))
-    draw_burner(img)
     s=date.fromisoformat(data["week_start"]); e=date.fromisoformat(data["week_end"])
     months=["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"]
-    d.multiline_text((930,235),f"SEMANA DEL\n{s.day} AL {e.day} {months[e.month-1]} {e.year}",
+    d.multiline_text((950,235),f"SEMANA DEL\n{s.day} AL {e.day} {months[e.month-1]} {e.year}",
                      font=font(24),fill=INK,anchor="ra",align="right",spacing=7)
     d.text((75,315),"Precio medio",font=font(65,True),fill=INK)
     d.text((75,392),"del",font=font(65,True),fill=INK)
@@ -106,8 +104,8 @@ def render(data):
     d.text((105,780),f'{fnum(data["weekly_mean_mwh"],2)} €/MWh',font=font(32),fill=MUTED)
     pct=round(data["pct_vs_historical"])
     d.rounded_rectangle((650,640,985,790),radius=24,fill=(232,242,228))
-    d.text((690,665),f'{"↓" if pct<0 else "↑"} {pct:+d}%',font=font(48,True),fill=GREEN)
-    d.text((690,728),"vs. máximo histórico",font=font(21),fill=INK)
+    d.text((817,665),f'{"↓" if pct<0 else "↑"} {pct:+d}%',font=font(45,True),fill=GREEN,anchor="ma")
+    d.text((817,728),"vs. máximo histórico",font=font(20),fill=INK,anchor="ma")
     d.text((105,835),"Media diaria de la semana",font=font(27,True),fill=INK)
     x0,y0,x1,y1=120,875,950,1055
     vals=[x["price_mwh"]/1000 for x in data["daily"]]
@@ -121,14 +119,14 @@ def render(data):
     for x,y in pts: d.ellipse((x-6,y-6,x+6,y+6),fill=GREEN)
     for i,l in enumerate(["L","M","X","J","V","S","D"]):
         x=x0+i*(x1-x0)/6; d.text((x,1070),l,font=font(22),fill=MUTED,anchor="ma")
-    d.rounded_rectangle((95,1125,985,1235),radius=24,fill=LIGHT)
+    d.rounded_rectangle((95,1115,985,1250),radius=24,fill=LIGHT)
     metrics=[("Mínimo",data["min_mwh"]/1000),("Máximo",data["max_mwh"]/1000),("Máximo histórico",data["historical_max_mwh"]/1000)]
     for i,(lab,val) in enumerate(metrics):
         x=[205,505,805][i]
-        d.text((x,1147),lab,font=font(22,i==2),fill=INK,anchor="ma")
-        d.text((x,1183),fnum(val,3),font=font(40,True),fill=INK,anchor="ma")
-        d.text((x,1221),"€/kWh",font=font(19),fill=INK,anchor="ma")
-    d.text((805,1240),data["historical_max_date"],font=font(18),fill=MUTED,anchor="ma")
+        d.text((x,1135),lab,font=font(21,i==2),fill=INK,anchor="ma")
+        d.text((x,1172),fnum(val,3),font=font(38,True),fill=INK,anchor="ma")
+        d.text((x,1212),"€/kWh",font=font(18),fill=INK,anchor="ma")
+    d.text((805,1235),data["historical_max_date"],font=font(16),fill=MUTED,anchor="ma")
     d.text((95,1305),"Fuente: MIBGAS PVB. Precio diario del mercado mayorista.",font=font(21),fill=MUTED)
     d.text((95,1338),"No equivale al precio final de tu factura.",font=font(21),fill=MUTED)
     d.line((95,1380,165,1380),fill=GREEN,width=4)
