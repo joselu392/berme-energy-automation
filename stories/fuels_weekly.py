@@ -253,9 +253,10 @@ def sparkline(draw, box, series, color):
     draw.line((x0, y0, x1, y0), fill=(222, 219, 212), width=1)
     draw.line((x0, y1, x1, y1), fill=(222, 219, 212), width=1)
     draw.polygon([pts[0], *pts, (pts[-1][0], y1), (pts[0][0], y1)], fill=pale)
-    draw.line(pts, fill=color, width=6, joint="curve")
+    # A finer stroke stays crisp after Instagram resizes the 1080 px Story.
+    draw.line(pts, fill=color, width=3, joint="curve")
     for index, (x, y) in enumerate(pts):
-        radius = 6 if index in (0, len(pts)-1) else 3
+        radius = 4 if index in (0, len(pts)-1) else 2
         draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=color)
 
     if series:
