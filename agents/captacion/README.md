@@ -16,15 +16,12 @@ MVP gratuito del agente de captación y seguimiento comercial.
 - Cloudflare Workers Free.
 - Cloudflare D1 Free.
 - Workers AI dentro de su asignación gratuita.
-- GitHub Actions para comprobaciones.
+- GitHub Actions para comprobaciones y despliegue.
 
-## Puesta en marcha
+## Despliegue
 
-1. Crear una cuenta gratuita de Cloudflare.
-2. Ejecutar `npm install` y `npx wrangler login`.
-3. Crear D1 con `npx wrangler d1 create berme-energy`.
-4. Sustituir `database_id` en `wrangler.toml`.
-5. Crear el secreto con `npx wrangler secret put ADMIN_TOKEN`.
-6. Ejecutar `npm run db:remote` y `npm run deploy`.
+El flujo `Deploy Berme Captacion Agent` verifica el proyecto, aplica las migraciones D1,
+configura el acceso privado y publica el agente al actualizar `main`. También admite
+ejecución manual desde GitHub Actions.
 
 El envío de mensajes es manual y requiere aprobación. Así se evitan cargos de WhatsApp y mensajes accidentales.
