@@ -33,14 +33,15 @@
 
   <dialog id="leadDialog">
     <form method="dialog" id="leadForm">
-      <div class="dialog-title"><h2>Nuevo contacto</h2><button class="icon" value="cancel" formnovalidate>×</button></div>
+      <div class="dialog-title"><h2 id="leadDialogTitle">Nuevo contacto</h2><button class="icon" value="cancel" formnovalidate>×</button></div>
       <label>Nombre<input name="name" required></label>
       <div class="grid"><label>Teléfono<input name="phone"></label><label>Email<input name="email" type="email"></label></div>
       <div class="grid"><label>Origen<select name="source"><option value="instagram">Instagram</option><option value="whatsapp">WhatsApp</option><option value="web">Web</option><option value="referral">Recomendación</option><option value="manual">Manual</option></select></label><label>Cliente<select name="customer_type"><option value="unknown">Por definir</option><option value="home">Hogar</option><option value="business">Negocio</option><option value="community">Comunidad</option></select></label></div>
-      <label>Suministro<select name="supply_type"><option value="unknown">Por definir</option><option value="electricity">Luz</option><option value="gas">Gas</option><option value="both">Luz y gas</option></select></label>
+      <div class="grid"><label>Suministro<select name="supply_type"><option value="unknown">Por definir</option><option value="electricity">Luz</option><option value="gas">Gas</option><option value="both">Luz y gas</option></select></label><label>Prioridad<select name="priority"><option value="medium">Media</option><option value="high">Alta</option><option value="low">Baja</option></select></label></div>
+      <div class="grid"><label>Estado<select name="status"><option value="new">Nuevo</option><option value="contacted">Contactado</option><option value="interested">Interesado</option><option value="waiting_bill">Esperando factura</option><option value="bill_received">Factura recibida</option><option value="proposal_sent">Propuesta enviada</option><option value="won">Cliente</option><option value="lost">Descartado</option></select></label><label>Próximo seguimiento<input name="next_followup_at" type="datetime-local"></label></div>
       <label>Notas<textarea name="notes" rows="3"></textarea></label>
       <label class="check"><input name="consent" type="checkbox"> Ha autorizado el registro y contacto</label>
-      <button type="submit">Guardar contacto</button>
+      <button type="submit" id="saveLead">Guardar contacto</button>
     </form>
   </dialog>
 
