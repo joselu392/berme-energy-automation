@@ -139,5 +139,146 @@
         "status": "cached"
       }
     ]
+  },
+  {
+    "date": "2026-09-29",
+    "week_start": "2026-09-21",
+    "week_end": "2026-09-27",
+    "methodology": {
+      "scope": "España peninsular, hogar 2.0TD, día laborable",
+      "metric": "Media aritmética del término de energía sin impuestos",
+      "sample": 10,
+      "periods": "Valle 00-08; llano 08-10, 14-18 y 22-24; punta 10-14 y 18-22",
+      "excludes": "potencia, cuotas, mantenimiento, servicios e impuestos"
+    },
+    "period_average": {
+      "valley": 0.1057175,
+      "flat": 0.1311077,
+      "peak": 0.2038052
+    },
+    "weekly_average_eur_kwh": 0.135117,
+    "business_weekly_average_eur_kwh": 0.14371853968253967,
+    "business_historical_average_eur_kwh": 0.14371853968253967,
+    "business_change_vs_historical_pct": 0.0,
+    "business_sample": 3,
+    "historical_average_eur_kwh": 0.135117,
+    "change_vs_historical_pct": 0.0,
+    "historical_weeks": 2,
+    "weekly_history": [
+      0.135117,
+      0.135117
+    ],
+    "providers": [
+      {
+        "name": "Endesa",
+        "tariff": "Conecta 3 Periodos",
+        "source_url": "https://www.endesa.com/es/luz-y-gas/luz/one/tarifa-one-luz-3periodos",
+        "period_prices": [
+          0.09441,
+          0.11781,
+          0.18621
+        ],
+        "status": "cached"
+      },
+      {
+        "name": "Iberdrola",
+        "tariff": "Plan Online 3 Periodos",
+        "source_url": "https://www.iberdrola.es/luz/tarifas/plan-online-tres-periodos",
+        "period_prices": [
+          0.099,
+          0.136,
+          0.194
+        ],
+        "status": "cached"
+      },
+      {
+        "name": "Naturgy",
+        "tariff": "Tarifa Noche",
+        "source_url": "https://www.naturgy.es/hogar/luz/tarifa_noche",
+        "period_prices": [
+          0.0809,
+          0.1052,
+          0.1737
+        ],
+        "status": "cached"
+      },
+      {
+        "name": "Repsol",
+        "tariff": "Discriminación Horaria",
+        "source_url": "https://www.repsol.es/particulares/hogar/luz-y-gas/tarifas/tarifa-discriminacion-horaria/",
+        "period_prices": [
+          0.0969,
+          0.1159,
+          0.1999
+        ],
+        "status": "cached"
+      },
+      {
+        "name": "TotalEnergies",
+        "tariff": "Programa tu Ahorro",
+        "source_url": "https://www.totalenergies.es/es/hogares/tarifas-luz",
+        "period_prices": [
+          0.064852,
+          0.092051,
+          0.160301
+        ],
+        "status": "cached"
+      },
+      {
+        "name": "Octopus",
+        "tariff": "Octopus 3",
+        "source_url": "https://octopusenergy.es/tarifa-octopus-3",
+        "period_prices": [
+          0.079,
+          0.098,
+          0.184
+        ],
+        "status": "cached"
+      },
+      {
+        "name": "Gana Energía",
+        "tariff": "Tramos Horarios",
+        "source_url": "https://ganaenergia.com/tarifas-luz/tramos-horarios",
+        "period_prices": [
+          0.08,
+          0.104,
+          0.171
+        ],
+        "status": "cached"
+      },
+      {
+        "name": "Holaluz",
+        "tariff": "Tarifa 3",
+        "source_url": "https://www.holaluz.com/luz/tarifas-luz",
+        "period_prices": [
+          0.134,
+          0.163,
+          0.242
+        ],
+        "status": "cached"
+      },
+      {
+        "name": "Plenitude",
+        "tariff": "Tendencia",
+        "source_url": "https://eniplenitude.es/hogar/tarifas-luz/tendencia/",
+        "period_prices": [
+          0.185,
+          0.174,
+          0.248
+        ],
+        "status": "cached"
+      },
+      {
+        "name": "Pepeenergy",
+        "tariff": "Variable",
+        "source_url": "https://www.pepeenergy.com/tarifas-luz/tarifa-variable-luz",
+        "period_prices": [
+          0.143113,
+          0.205116,
+          0.278941
+        ],
+        "status": "cached"
+      }
+    ]
   }
 ]
