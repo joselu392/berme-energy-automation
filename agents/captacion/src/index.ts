@@ -39,12 +39,13 @@ async function createLead(request: Request, env: Env) {
   if (duplicate) return json({ error: "Contacto duplicado", lead: duplicate }, 409);
 
   const result = await env.DB.prepare(`
-    INSERT INTO leads (name, phone, email, source, customer_type, supply_type, notes, consent)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO leads (name, phone, email, source, customer_type, supply_type, status, priority, notes, consent, next_followup_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).bind(
     lead.name.trim(), lead.phone?.trim() || null, lead.email?.trim().toLowerCase() || null,
     lead.source || "manual", lead.customer_type || "unknown", lead.supply_type || "unknown",
-    lead.notes?.trim() || "", lead.consent ? 1 : 0,
+    lead.status || "new", lead.priority || "medium", lead.notes?.trim() || "", lead.consent ? 1 : 0,
+    lead.next_followup_at || null,
   ).run();
 
   await env.DB.prepare("INSERT INTO activities (lead_id, kind, content) VALUES (?, 'created', ?)")
@@ -54,8 +55,24 @@ async function createLead(request: Request, env: Env) {
 
 async function updateLead(request: Request, env: Env, id: number) {
   const patch = await body<Record<string, unknown>>(request);
-  const allowed = new Set(["status", "priority", "notes", "next_followup_at", "consent", "customer_type", "supply_type"]);
-  const entries = Object.entries(patch).filter(([key]) => allowed.has(key));
+  const allowed = new Set(["name", "phone", "email", "source", "status", "priority", "notes", "next_followup_at", "consent", "customer_type", "supply_type"]);
+  if ("name" in patch && !String(patch.name || "").trim()) return json({ error: "El nombre es obligatorio" }, 400);
+
+  const normalized = { ...patch };
+  if ("name" in normalized) normalized.name = String(normalized.name || "").trim();
+  if ("phone" in normalized) normalized.phone = String(normalized.phone || "").trim() || null;
+  if ("email" in normalized) normalized.email = String(normalized.email || "").trim().toLowerCase() || null;
+  if ("notes" in normalized) normalized.notes = String(normalized.notes || "").trim();
+  if ("next_followup_at" in normalized) normalized.next_followup_at = normalized.next_followup_at || null;
+
+  if ("phone" in normalized || "email" in normalized) {
+    const duplicate = await env.DB.prepare(
+      "SELECT id, name FROM leads WHERE id <> ?3 AND ((?1 <> '' AND phone = ?1) OR (?2 <> '' AND email = ?2)) LIMIT 1"
+    ).bind(String(normalized.phone || ""), String(normalized.email || ""), id).first();
+    if (duplicate) return json({ error: "Ya existe otro contacto con ese teléfono o correo", lead: duplicate }, 409);
+  }
+
+  const entries = Object.entries(normalized).filter(([key]) => allowed.has(key));
   if (!entries.length) return json({ error: "No hay campos válidos" }, 400);
   const set = entries.map(([key]) => `${key} = ?`).join(", ");
   const values = entries.map(([key, value]) => key === "consent" ? (value ? 1 : 0) : value);
