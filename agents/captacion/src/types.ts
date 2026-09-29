@@ -22,4 +22,7 @@ export interface LeadInput {
   supply_type?: "electricity" | "gas" | "both" | "fuel" | "unknown";
   notes?: string;
   consent?: boolean;
+  status?: LeadStatus;
+  priority?: "high" | "medium" | "low";
+  next_followup_at?: string;
 }
