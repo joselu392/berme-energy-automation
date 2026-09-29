@@ -2,6 +2,11 @@ name: Deploy Berme Captacion Agent
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "agents/captacion/**"
+      - ".github/workflows/deploy-captacion-agent.yml"
 
 permissions:
   contents: read
