@@ -1,0 +1,32 @@
+name: Publish Empieza update 2026-10-06
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/publish-empieza-update-20261006.yml']
+permissions:
+  contents: read
+concurrency:
+  group: berme-empieza-update-20261006
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event.head_commit.message == 'Publish approved Empieza update 2026-10-06'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Publish approved stories in order
+        env:
+          META_IG_ACCESS_TOKEN: ${{ secrets.META_IG_ACCESS_TOKEN }}
+          META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
+        run: python stories/publish_empieza_update_20261006.py
+      - name: Save publication receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: empieza-publication-receipt
+          path: publication.json
+          if-no-files-found: ignore
