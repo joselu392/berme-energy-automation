@@ -1,7 +1,7 @@
 {
-  "date": "2026-09-29",
-  "week_start": "2026-09-21",
-  "week_end": "2026-09-27",
+  "date": "2026-10-06",
+  "week_start": "2026-09-28",
+  "week_end": "2026-10-04",
   "methodology": {
     "scope": "España peninsular, hogar 2.0TD, día laborable",
     "metric": "Media aritmética del término de energía sin impuestos",
@@ -10,21 +10,22 @@
     "excludes": "potencia, cuotas, mantenimiento, servicios e impuestos"
   },
   "period_average": {
-    "valley": 0.1057175,
-    "flat": 0.1311077,
-    "peak": 0.2038052
+    "valley": 0.1061275,
+    "flat": 0.13259769999999999,
+    "peak": 0.2057352
   },
-  "weekly_average_eur_kwh": 0.135117,
+  "weekly_average_eur_kwh": 0.1361460476190476,
   "business_weekly_average_eur_kwh": 0.14371853968253967,
   "business_historical_average_eur_kwh": 0.14371853968253967,
   "business_change_vs_historical_pct": 0.0,
   "business_sample": 3,
   "historical_average_eur_kwh": 0.135117,
-  "change_vs_historical_pct": 0.0,
-  "historical_weeks": 2,
+  "change_vs_historical_pct": 0.761597444472284,
+  "historical_weeks": 3,
   "weekly_history": [
     0.135117,
-    0.135117
+    0.135117,
+    0.1361460476190476
   ],
   "providers": [
     {
@@ -54,11 +55,11 @@
       "tariff": "Tarifa Noche",
       "source_url": "https://www.naturgy.es/hogar/luz/tarifa_noche",
       "period_prices": [
-        0.0809,
-        0.1052,
-        0.1737
+        0.085,
+        0.1201,
+        0.193
       ],
-      "status": "cached"
+      "status": "live"
     },
     {
       "name": "Repsol",
