@@ -14,6 +14,9 @@ on:
   schedule:
     - cron: "0 15 * * 2"
       timezone: "Europe/Madrid"
+    # One-off publication: the date guard below restricts this to 2026-10-06.
+    - cron: "0 21 6 10 *"
+      timezone: "Europe/Madrid"
   workflow_dispatch:
     inputs:
       publish:
@@ -34,7 +37,36 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  publication_window:
+    runs-on: ubuntu-latest
+    outputs:
+      allowed: ${{ steps.window.outputs.allowed }}
+    steps:
+      - id: window
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          now = datetime.now(ZoneInfo("Europe/Madrid"))
+          allowed = True
+          if os.environ["EVENT_NAME"] == "schedule":
+              exception = os.environ["EVENT_SCHEDULE"] == "0 21 6 10 *"
+              if exception:
+                  allowed = now.date().isoformat() == "2026-10-06" and now.hour >= 21
+              else:
+                  allowed = now.date().isoformat() != "2026-10-06"
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write(f"allowed={str(allowed).lower()}\n")
+          print(f"Publication window allowed: {allowed}; Madrid: {now.isoformat()}")
+          PY
+
   stories:
+    needs: publication_window
+    if: needs.publication_window.outputs.allowed == 'true'
     runs-on: ubuntu-latest
     env:
       BERME_REFERENCE_DATE: ${{ github.event.inputs.reference_date }}
