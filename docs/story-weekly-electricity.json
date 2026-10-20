@@ -1,7 +1,7 @@
 {
-  "date": "2026-10-13",
-  "week_start": "2026-10-05",
-  "week_end": "2026-10-11",
+  "date": "2026-10-20",
+  "week_start": "2026-10-12",
+  "week_end": "2026-10-18",
   "methodology": {
     "scope": "España peninsular, hogar 2.0TD, día laborable",
     "metric": "Media aritmética del término de energía sin impuestos",
@@ -19,12 +19,13 @@
   "business_historical_average_eur_kwh": 0.14371853968253967,
   "business_change_vs_historical_pct": 0.0,
   "business_sample": 3,
-  "historical_average_eur_kwh": 0.13546001587301587,
-  "change_vs_historical_pct": 0.5064459365447416,
-  "historical_weeks": 4,
+  "historical_average_eur_kwh": 0.1356315238095238,
+  "change_vs_historical_pct": 0.37935414649352683,
+  "historical_weeks": 5,
   "weekly_history": [
     0.135117,
     0.135117,
+    0.1361460476190476,
     0.1361460476190476,
     0.1361460476190476
   ],
