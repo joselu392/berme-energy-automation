@@ -1,12 +1,12 @@
 {
-  "week_start": "2026-11-03",
-  "week_end": "2026-11-09",
-  "gasoline_eur_l": 1.729889783,
-  "diesel_eur_l": 1.898318015,
-  "brent_eur_l_equiv": 0.5126923325585001,
-  "gasoline_change_pct": 0.0,
-  "diesel_change_pct": 0.0,
-  "brent_change_pct": -9.007128714791236,
+  "week_start": "2026-11-10",
+  "week_end": "2026-11-16",
+  "gasoline_eur_l": 1.624214422,
+  "diesel_eur_l": 1.837213481,
+  "brent_eur_l_equiv": 0.5312458430459397,
+  "gasoline_change_pct": -3.7650837796843084,
+  "diesel_change_pct": -2.2150231260944286,
+  "brent_change_pct": 1.3315963897687855,
   "gasoline_historical_max": 2.14158,
   "gasoline_historical_date": "2022-06-20",
   "diesel_historical_max": 2.10048,
@@ -14,10 +14,6 @@
   "brent_historical_max": 0.7690754667702422,
   "brent_historical_date": "2022-03-08",
   "gasoline_trend": [
-    {
-      "date": "2026-09-21",
-      "value": 1.9279810269999997
-    },
     {
       "date": "2026-09-28",
       "value": 1.939726004
@@ -44,14 +40,14 @@
     },
     {
       "date": "2026-11-09",
-      "value": 1.729889783
+      "value": 1.68776
+    },
+    {
+      "date": "2026-11-16",
+      "value": 1.624214422
     }
   ],
   "diesel_trend": [
-    {
-      "date": "2026-09-21",
-      "value": 1.918064942
-    },
     {
       "date": "2026-09-28",
       "value": 1.9344266589999999
@@ -78,21 +74,21 @@
     },
     {
       "date": "2026-11-09",
-      "value": 1.898318015
+      "value": 1.87883
+    },
+    {
+      "date": "2026-11-16",
+      "value": 1.837213481
     }
   ],
   "brent_trend": [
     {
-      "date": "2026-11-09",
-      "value": 0.511535311741655
+      "date": "2026-11-16",
+      "value": 0.5305278922944822
     },
     {
-      "date": "2026-11-10",
-      "value": 0.5056976449635799
-    },
-    {
-      "date": "2026-11-11",
-      "value": 0.5208440409702652
+      "date": "2026-11-17",
+      "value": 0.5319637937973972
     }
   ],
   "source": "Comisión Europea Weekly Oil Bulletin (España) + EIA Brent + FX EUR/USD"
